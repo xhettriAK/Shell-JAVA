@@ -24,8 +24,6 @@ public class Shell {
                 }
                 else if(c == quoteSame){
                     insideQuote = false;
-                }
-                else if(!insideQuote){
                     insideQuoteFirstTime=true;
                     quoteSame= ' ';
                 }
