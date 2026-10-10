@@ -64,7 +64,7 @@ public class Shell {
                 continue;
             }
             List<String> userList = new ArrayList<>(parsing(user));
-            System.out.println(userList.toString());
+
             if (userList.getFirst().equals("exit")) {
                 break;
             }
