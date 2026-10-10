@@ -7,31 +7,29 @@ public class Shell {
     public static List<String> parsing(String userInput)
     {
         boolean insideQuote=false;
-        char quoteSame = ' ';
+        char currentQuote = '\0';
         List<String>usrList = new ArrayList<>();
         StringBuilder userBuilder = new StringBuilder();
         boolean insideQuoteFirstTime=true;
         for(int i = 0;i<userInput.length();i++)
         {
             char c = userInput.charAt(i);
+
             if(c== '\''|| c=='\"') {
-                if(c!=quoteSame&& insideQuoteFirstTime)
+                if(c!=currentQuote && currentQuote=='\0')
                 {
-                    quoteSame=c;
-                    insideQuoteFirstTime=false;
-                    insideQuote = true;
+                    currentQuote=c;
 
                 }
-                else if(c == quoteSame){
-                    insideQuote = false;
-                    insideQuoteFirstTime=true;
-                    quoteSame= ' ';
+                else if(c==currentQuote)
+                {
+                    currentQuote='.';
                 }
-                else{
+                else {
                     userBuilder.append(c);
                 }
             }
-            else if ((c == ' ' || c=='\t')&& insideQuote) {
+            else if ((c == ' ' || c=='\t')&& currentQuote!='\0') {
                 userBuilder.append(c);
             }
             else if(c == ' '||c=='\t') {
@@ -40,7 +38,6 @@ public class Shell {
 
                     userBuilder.delete(0,userBuilder.length());
                 }
-
             }
             else{
                 userBuilder.append(c);
