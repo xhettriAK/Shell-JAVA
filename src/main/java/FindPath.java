@@ -20,13 +20,13 @@ public class FindPath {
         return "";
     }
 
-    public static void filePath(String userArgument) {
-        String path = checkExecutable(userArgument);
+    public static void filePath(String command) {
+        String path = checkExecutable(command);
 
         if (!path.isEmpty()) {
-            System.out.println(userArgument + " is " + path);
+            System.out.println(command + " is " + path);
         } else {
-            System.out.println(userArgument + ": not found");
+            System.out.println(command + ": not found");
         }
     }
 }

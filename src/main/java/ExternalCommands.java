@@ -1,9 +1,10 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class ExternalCommands {
-    public static boolean processCreation(String command,String[] commandArgument ) {
+    public static boolean processCreation(String command,List<String> commandArgument ) {
 
         if (!FindPath.checkExecutable(command).isEmpty()) {
             try {
@@ -25,7 +26,7 @@ public class ExternalCommands {
         }
         return false;
     }
-    public static void runCommands(String command, String[] commandArgument) {
+    public static void runCommands(String command, List<String> commandArgument) {
         if (!processCreation(command, commandArgument)) {
             System.out.println(command + ": command not found");
         }

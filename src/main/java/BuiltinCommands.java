@@ -1,76 +1,45 @@
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 public class BuiltinCommands {
 
     public final static  String[]listCommands= {"echo","exit","pwd","type","cd"};
     
     private static String path= Path.of("").toAbsolutePath().toString();
-    public static boolean isThisBuiltin(String userArgument )
+    public static boolean isThisBuiltin(String command )
     {
-        for(var command: listCommands) {
-            if(userArgument.equals(command)) {
+        for(var check2: listCommands) {
+            if(command.equals(check2)) {
                 return true;
             }
         }
         return false;
     }
-    public static void runCommands( String command, String userArgument)
+    public static void runCommands( String command, List<String> userArgument)
     {
+        StringBuilder argumentBuilder = new StringBuilder();
+        for(var i: userArgument)
+        {
+            argumentBuilder.append(i);
+
+        }
+        String argument = argumentBuilder.toString();
         switch (command) {
             case "echo" -> echoFunction(userArgument);
-            case "type" -> typeFunction(userArgument);
+            case "type" -> typeFunction(argument);
             case "pwd" -> pwdFunction();
-            case "cd" ->cdFunction(userArgument);
+            case "cd" ->cdFunction(argument);
         }
     }
-    public static void echoFunction(String userArgument)
+    public static void echoFunction(List<String> userArgument)
     {
-        StringBuilder userArgumentBuilder = new StringBuilder();
-        char  quoteMatch = ' ';
-        boolean spaceReserved = false;
-        int spaceReservedLoop = 0;
-        int firstQuote = 0;
-        for(int i = 0; i<userArgument.length(); i++)
+        for(int i = 0; i<userArgument.toArray().length;i++)
         {
-            char c = userArgument.charAt(i);
-            if(c== '\'')
-            {
-                if(firstQuote == 0)
-                {
-                    quoteMatch = c;
-                    spaceReserved = true;
-                    firstQuote++;
-                }
-                else {
-                    spaceReserved = false;
-                    firstQuote = 0;
-                    quoteMatch=' ';
-                }
-            }
-            else if (c == ' ' && spaceReserved)
-            {
-                userArgumentBuilder.append(c);
-            }
-            else if(c == ' ')
-            {
-                //space resevered for only one
-                if(spaceReservedLoop==0) {
-                    userArgumentBuilder.append(c);
-                    spaceReservedLoop++;
-                }
-
-            }
-            else{
-
-                userArgumentBuilder.append(c);
-                spaceReservedLoop=0;
-
-            }
-
+            System.out.print(userArgument.get(i)+" ");
         }
-        userArgument= userArgumentBuilder.toString().trim();
-        System.out.println(userArgument);
+        System.out.println();
+
 //        if(insideQuote)
 //        {
 //            StringBuilder userArgumentBuilder2 = new StringBuilder(userArgumentBuilder.toString());
@@ -90,12 +59,12 @@ public class BuiltinCommands {
     {
         System.out.println(path);
     }
-    public static void typeFunction(String userArgument)
+    public static void typeFunction( String argument)
     {
-        if (isThisBuiltin(userArgument)) {
-            System.out.println(userArgument + " is a shell builtin");
+        if (isThisBuiltin(argument)) {
+            System.out.println(argument + " is a shell builtin");
         } else {
-            FindPath.filePath(userArgument);
+            FindPath.filePath(argument);
         }
     }
     public static void cdFunction(String userArgument)
