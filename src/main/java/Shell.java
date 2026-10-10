@@ -6,17 +6,33 @@ public class Shell {
 
     public static List<String> parsing(String userInput)
     {
-        boolean spaceReserved=false;
+        boolean insideQuote=false;
+        char quoteSame = ' ';
         List<String>usrList = new ArrayList<>();
         StringBuilder userBuilder = new StringBuilder();
+        boolean insideQuoteFirstTime=true;
         for(int i = 0;i<userInput.length();i++)
         {
             char c = userInput.charAt(i);
-            if(c== '\'') {
+            if(c== '\''|| c=='\"') {
+                if(c!=quoteSame&& insideQuoteFirstTime)
+                {
+                    quoteSame=c;
+                    insideQuoteFirstTime=false;
+                    insideQuote = true;
 
-                spaceReserved = !spaceReserved;
+                }
+                else if(c == quoteSame){
+                    insideQuote = false;
+                }
+                else if(!insideQuote){
+                    insideQuoteFirstTime=true;
+                }
+                else{
+                    userBuilder.append(c);
+                }
             }
-            else if ((c == ' ' || c=='\t')&& spaceReserved) {
+            else if ((c == ' ' || c=='\t')&& insideQuote) {
                 userBuilder.append(c);
             }
             else if(c == ' '||c=='\t') {
@@ -48,7 +64,7 @@ public class Shell {
                 continue;
             }
             List<String> userList = new ArrayList<>(parsing(user));
-
+            System.out.println(userList.toString());
             if (userList.getFirst().equals("exit")) {
                 break;
             }
