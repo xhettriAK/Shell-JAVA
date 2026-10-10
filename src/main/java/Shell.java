@@ -27,6 +27,7 @@ public class Shell {
                 }
                 else if(!insideQuote){
                     insideQuoteFirstTime=true;
+                    quoteSame= ' ';
                 }
                 else{
                     userBuilder.append(c);
