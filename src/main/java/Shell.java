@@ -11,11 +11,14 @@ public class Shell {
         List<String>usrList = new ArrayList<>();
         StringBuilder userBuilder = new StringBuilder();
         boolean insideQuoteFirstTime=true;
+        boolean ordinary = false;
         for(int i = 0;i<userInput.length();i++)
         {
             char c = userInput.charAt(i);
-
-            if(c== '\''|| c=='\"') {
+            if(c=='\\'&& !ordinary) {
+                ordinary = true;
+            }
+            else if((c== '\''|| c=='\"')&& !ordinary) {
                 if(c!=currentQuote && currentQuote=='\0')
                 {
                     currentQuote=c;
@@ -28,6 +31,11 @@ public class Shell {
                 else {
                     userBuilder.append(c);
                 }
+            }
+            else if((c==' '||c =='\t')&& ordinary)
+            {
+                userBuilder.append(c);
+                ordinary= false;
             }
             else if ((c == ' ' || c=='\t')&& currentQuote!='\0') {
                 userBuilder.append(c);
