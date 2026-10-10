@@ -23,7 +23,7 @@ public class Shell {
                 }
                 else if(c==currentQuote)
                 {
-                    currentQuote='.';
+                    currentQuote='\0';
                 }
                 else {
                     userBuilder.append(c);
