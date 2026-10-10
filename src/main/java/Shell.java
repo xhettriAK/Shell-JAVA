@@ -49,6 +49,7 @@ public class Shell {
             }
             else{
                 userBuilder.append(c);
+                ordinary = false;
             }
         }
         if(!userBuilder.isEmpty()) {
