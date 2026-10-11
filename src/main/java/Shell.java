@@ -15,10 +15,29 @@ public class Shell {
         for(int i = 0;i<userInput.length();i++)
         {
             char c = userInput.charAt(i);
-            if(c=='\\'&& !ordinary&&currentQuote=='\0') {
+            if ((c == '\\' && !ordinary) && (currentQuote =='\"'))
+            {
+                //now check the upcoming char
+                char upComing = userInput.charAt(i+1);
+                if(upComing=='\"')
+                {
+                    userBuilder.append(userInput.charAt(i+1));
+                    i++;
+                    continue;
+                }
+                else if(upComing=='\\')
+                {
+                    userBuilder.append(userInput.charAt(i+1));
+                    i++;
+                    continue;
+                }
+
+            }
+            if((c=='\\'&& !ordinary) &&(currentQuote=='\0')) {
                 ordinary = true;
             }
-            else if((c== '\''|| c=='\"')&& !ordinary) {
+
+            else if((c == '\'' || c == '\"') && !ordinary) {
                 if(c!=currentQuote && currentQuote=='\0')
                 {
                     currentQuote=c;
