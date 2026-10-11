@@ -15,7 +15,7 @@ public class Shell {
         for(int i = 0;i<userInput.length();i++)
         {
             char c = userInput.charAt(i);
-            if(c=='\\'&& !ordinary) {
+            if(c=='\\'&& !ordinary&&currentQuote=='\0') {
                 ordinary = true;
             }
             else if((c== '\''|| c=='\"')&& !ordinary) {
