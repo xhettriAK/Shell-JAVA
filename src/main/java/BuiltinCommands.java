@@ -27,7 +27,7 @@ public class BuiltinCommands {
         StringBuilder argumentBuilder = new StringBuilder();
         for(var i: userArgument)
         {
-            argumentBuilder.append(i);
+            argumentBuilder.append(i).append(" ");
 
         }
 
