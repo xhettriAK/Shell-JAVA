@@ -117,6 +117,7 @@ public class Shell {
             else if( redirectUnquoted!=-1) {
                 fileName = userList.get(redirectUnquoted + 1);
                 userArgument = userList.subList(1,redirectUnquoted);
+                userList = userList.subList(0,redirectUnquoted);
             }
             else {
                 userArgument = userList.subList(1, userList.toArray().length);
@@ -129,7 +130,7 @@ public class Shell {
             if (BuiltinCommands.isThisBuiltin(command)) {
                     BuiltinCommands.runCommands(command, userArgument,fileName,isFileNameProvided);
             } else {
-                ExternalCommands.runCommands(command, userArgument, fileName, isFileNameProvided);
+                ExternalCommands.runCommands(command, userList, fileName, isFileNameProvided);
             }
         }
     }
