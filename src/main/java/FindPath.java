@@ -1,8 +1,8 @@
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class FindPath {
     public static String checkExecutable(String filename) {
@@ -19,6 +19,22 @@ public class FindPath {
         }
         return "";
     }
+    public static void createFileforBuiltIN(String userArgument, String filename)
+    {
+        Path path = getAbsolutePath(filename);
+        try{
+            Files.writeString(path,userArgument);
+        } catch (IOException e) {
+            System.out.println(filename+": no file or directory");
+        }
+    }
+    public static Path getAbsolutePath(String filename) {
+
+        Path currentPath = Path.of(BuiltinCommands.getCurrentPath());
+
+        return currentPath.resolve(filename);
+    }
+
 
     public static void filePath(String command) {
         String path = checkExecutable(command);

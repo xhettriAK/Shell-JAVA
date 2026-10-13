@@ -1,34 +1,47 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Path;
 import java.util.List;
 
 public class ExternalCommands {
-    public static boolean processCreation(String command,List<String> commandArgument ) {
 
-        if (!FindPath.checkExecutable(command).isEmpty()) {
-            try {
-                ProcessBuilder pb = new ProcessBuilder(commandArgument);
-                Process p = pb.start();
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                p.waitFor();
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            return true;
-        }
-        return false;
+    public static void processCreationFile(ProcessBuilder pb, String fileName) throws IOException,  InterruptedException {
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectOutput(FindPath.getAbsolutePath(fileName).toFile());
+        Process p = pb.start();
+        p.waitFor();
     }
-    public static void runCommands(String command, List<String> commandArgument) {
-        if (!processCreation(command, commandArgument)) {
-            System.out.println(command + ": command not found");
+    public static void processCreation(ProcessBuilder pb) throws IOException,  InterruptedException {
+
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        Process p = pb.start();
+        p.waitFor();
+
+
+    }
+    public static boolean wasCommandFound(String command) {
+
+        return !FindPath.checkExecutable(command).isEmpty();
+    }
+    public static void runCommands(String command, List<String> commandArgument,  String fileName,boolean isFileNameProvided) {
+        if (!wasCommandFound(command)) {
+            System.err.println(command + ": command not found");
+        }
+        else {
+
+            Path currentPath = Path.of(BuiltinCommands.getCurrentPath());
+            ProcessBuilder pb = new ProcessBuilder(commandArgument).directory(currentPath.toFile());
+            // directory as cd can change the directory , we can provide new process their  new directory
+            try {
+                if (isFileNameProvided) {
+                    processCreationFile( pb, fileName);
+                } else {
+                    System.out.println("external command running");
+                    processCreation( pb);
+                }
+            } catch (IOException | InterruptedException e) {
+                System.err.println(command +": "+e.getMessage());
+            }
         }
     }
 }
