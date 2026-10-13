@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.sql.SQLOutput;
 
 public class FindPath {
     public static String checkExecutable(String filename) {
@@ -23,7 +25,8 @@ public class FindPath {
     {
         Path path = getAbsolutePath(filename);
         try{
-            Files.writeString(path,userArgument);
+            Files.writeString(path,userArgument+'\n');
+
         } catch (IOException e) {
             System.out.println(filename+": no file or directory");
         }
@@ -36,13 +39,12 @@ public class FindPath {
     }
 
 
-    public static void filePath(String command) {
+    public static String filePath(String command) {
         String path = checkExecutable(command);
-
         if (!path.isEmpty()) {
-            System.out.println(command + " is " + path);
+           return command + " is " + path;
         } else {
-            System.out.println(command + ": not found");
+           return command + ": not found";
         }
     }
 }

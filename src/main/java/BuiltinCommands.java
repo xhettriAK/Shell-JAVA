@@ -53,7 +53,7 @@ public class BuiltinCommands {
     public static void pwdFunction(String userArgument, String fileName, boolean isFileNameProvided) {
 
         if (isFileNameProvided){
-            FindPath.createFileforBuiltIN(userArgument,fileName);
+            FindPath.createFileforBuiltIN(path,fileName);
         }
         else {
             System.out.println(path);
@@ -65,13 +65,17 @@ public class BuiltinCommands {
     {
         if (isThisBuiltin(userArgument)) {
             if (isFileNameProvided) {
-                FindPath.createFileforBuiltIN(userArgument, fileName);
+                FindPath.createFileforBuiltIN(userArgument+" is a shell builtin", fileName);
             } else {
                 System.out.println(userArgument + " is a shell builtin");
             }
         }
         else {
-            FindPath.filePath(userArgument);
+            if (isFileNameProvided) {
+                FindPath.createFileforBuiltIN(FindPath.filePath(userArgument), fileName);
+            } else {
+                System.out.println(FindPath.filePath(userArgument));
+            }
         }
     }
 
@@ -104,7 +108,7 @@ public class BuiltinCommands {
         }
         if(isFileNameProvided)
         {
-            FindPath.createFileforBuiltIN(userArgument,fileName);
+            FindPath.createFileforBuiltIN(path,fileName);
         }
     }
 }

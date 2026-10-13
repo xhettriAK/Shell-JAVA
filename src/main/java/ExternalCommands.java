@@ -1,3 +1,5 @@
+import jdk.swing.interop.SwingInterOpUtils;
+
 import java.io.*;
 import java.nio.file.Path;
 import java.util.List;
@@ -36,7 +38,6 @@ public class ExternalCommands {
                 if (isFileNameProvided) {
                     processCreationFile( pb, fileName);
                 } else {
-                    System.out.println("external command running");
                     processCreation( pb);
                 }
             } catch (IOException | InterruptedException e) {
