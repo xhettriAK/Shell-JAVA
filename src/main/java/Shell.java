@@ -126,7 +126,7 @@ public class Shell {
             if (BuiltinCommands.isThisBuiltin(command)) {
                     BuiltinCommands.runCommands(command, userArgument,fileName,isFileNameProvided);
             } else {
-                ExternalCommands.runCommands(command, userList, fileName, isFileNameProvided);
+                ExternalCommands.runCommands(command, userArgument, fileName, isFileNameProvided);
             }
         }
     }

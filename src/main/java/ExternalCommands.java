@@ -25,14 +25,22 @@ public class ExternalCommands {
 
         return !FindPath.checkExecutable(command).isEmpty();
     }
-    public static void runCommands(String command, List<String> commandArgument,  String fileName,boolean isFileNameProvided) {
+    public static void runCommands(String command, List<String> userArgument,  String fileName,boolean isFileNameProvided) {
         if (!wasCommandFound(command)) {
             System.err.println(command + ": command not found");
         }
         else {
+            StringBuilder argumentBuilder = new StringBuilder();
+            for(var i: userArgument)
+            {
+                argumentBuilder.append(i);
+
+            }
+
+            String argument = argumentBuilder.toString();
 
             Path currentPath = Path.of(BuiltinCommands.getCurrentPath());
-            ProcessBuilder pb = new ProcessBuilder(commandArgument).directory(currentPath.toFile());
+            ProcessBuilder pb = new ProcessBuilder(command, argument).directory(currentPath.toFile());
             // directory as cd can change the directory , we can provide new process their  new directory
             try {
                 if (isFileNameProvided) {
