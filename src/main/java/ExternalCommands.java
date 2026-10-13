@@ -27,7 +27,7 @@ public class ExternalCommands {
     }
     public static void runCommands(String command, List<String> userList,  String fileName,boolean isFileNameProvided) {
         if (!wasCommandFound(command)) {
-            System.err.println(command + ":command not found");
+            System.err.println(command + ": command not found");
         }
         else {
             Path currentPath = Path.of(BuiltinCommands.getCurrentPath());
@@ -40,7 +40,7 @@ public class ExternalCommands {
                     processCreation( pb);
                 }
             } catch (IOException | InterruptedException e) {
-                System.err.println(command +":"+e.getMessage());
+                System.err.println(command +": "+e.getMessage());
             }
         }
     }
