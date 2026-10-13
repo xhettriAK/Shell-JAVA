@@ -70,20 +70,15 @@ public class Shell {
                                 continue;
                         }
                     }
-                    else{
-                        userBuilder.append(c);
-                    }
-
                 } else if ((c == '>' && currentQuote == '\0') && !ordinary) {
                     if (!userBuilder.isEmpty()) {
                         usrList.add(userBuilder.toString());
                         userBuilder.delete(0, userBuilder.length());
                     }
-                        usrList.add(">");
-                        boxesCount = usrList.toArray().length - 1;
-                        continue;
+                    usrList.add(">");
+                    boxesCount = usrList.toArray().length - 1;
+                    continue;
                 }
-
                 userBuilder.append(c);
                 ordinary = false;
             }
