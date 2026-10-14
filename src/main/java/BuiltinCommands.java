@@ -22,68 +22,48 @@ public class BuiltinCommands {
         }
         return false;
     }
-    public static void runCommands( String command, List<String> userArgument, String fileName, boolean isFileNameProvided)
+    public static void runCommands( String command, List<String> userArgument )
     {
         StringBuilder argumentBuilder = new StringBuilder();
-        for(var i: userArgument)
+        for(var i : userArgument)
         {
-            if(userArgument.toArray().length>1) {
+            if(!userArgument.getLast().equals(i)) {
                 argumentBuilder.append(i).append(" ");
             }
             else{
                 argumentBuilder.append(i);
             }
         }
-
-        String argument = argumentBuilder.toString();
+        String userArg = argumentBuilder.toString();
         switch (command) {
-            case "echo" -> echoFunction(argument,fileName,isFileNameProvided);
-            case "type" -> typeFunction(argument,fileName,isFileNameProvided);
-            case "pwd" -> pwdFunction(argument,fileName,isFileNameProvided);
-            case "cd" ->cdFunction(argument,fileName,isFileNameProvided);
+            case "echo" -> echoFunction(userArg);
+            case "type" -> typeFunction(userArg);
+            case "pwd" -> pwdFunction();
+            case "cd" ->cdFunction(userArg);
         }
     }
-    public static void echoFunction(String userArgument, String fileName, boolean isFileNameProvided) {
-        if("no file".equals(fileName)) {
+    public static void echoFunction(String userArgument) {
+
             System.out.println(userArgument);
-        }
-        else{
-            FindPath.createFileforBuiltIN(userArgument, fileName);
-
-        }
     }
 
 
-    public static void pwdFunction(String userArgument, String fileName, boolean isFileNameProvided) {
-
-        if (isFileNameProvided){
-            FindPath.createFileforBuiltIN(path,fileName);
-        }
-        else {
-            System.out.println(path);
-        }
+    public static void pwdFunction() {
+        System.out.println(path);
 
 
     }
-    public static void typeFunction(String userArgument, String fileName, boolean isFileNameProvided)
+    public static void typeFunction(String userArgument)
     {
         if (isThisBuiltin(userArgument)) {
-            if (isFileNameProvided) {
-                FindPath.createFileforBuiltIN(userArgument+" is a shell builtin", fileName);
-            } else {
-                System.out.println(userArgument + " is a shell builtin");
-            }
+            System.out.println(userArgument + " is a shell builtin");
+        } else {
+            FindPath.filePath(userArgument);
         }
-        else {
-            if (isFileNameProvided) {
-                FindPath.createFileforBuiltIN(FindPath.filePath(userArgument), fileName);
-            } else {
-                System.out.println(FindPath.filePath(userArgument));
-            }
-        }
+
     }
 
-    public static void cdFunction(String userArgument, String fileName, boolean isFileNameProvided)
+    public static void cdFunction(String userArgument)
     {
         Path tempPath;
         String username = System.getenv("USER");
@@ -105,14 +85,10 @@ public class BuiltinCommands {
             absolutePath = absolutePath.toRealPath();
             isExist = true;
         } catch (IOException e) {
-            System.out.println("cd: " +userArgument +": No such file or directory");
+            System.err.println("cd: " +userArgument +": No such file or directory");
         }
         if(isExist){
             path = absolutePath.toString();
-        }
-        if(isFileNameProvided)
-        {
-            FindPath.createFileforBuiltIN(path,fileName);
         }
     }
 }
