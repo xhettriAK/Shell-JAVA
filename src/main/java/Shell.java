@@ -103,6 +103,7 @@ public class Shell {
                     continue;
                 }
                 userBuilder.append(c);
+                ordinary=false;
             }
         }
         if (!userBuilder.isEmpty()) {
