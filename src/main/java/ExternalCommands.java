@@ -4,50 +4,50 @@ import java.util.List;
 
 public class ExternalCommands {
 
-    public static void processCreationFile(ProcessBuilder pb, String outputFile, String errorFile) throws IOException,  InterruptedException {
-
-        if(!outputFile.isBlank() && !errorFile.isBlank()) {
-            pb.redirectError(FindPath.getAbsolutePath(errorFile).toFile());
-            pb.redirectOutput(FindPath.getAbsolutePath(outputFile).toFile());
-        }
-        else if(!outputFile.isBlank() && errorFile.isBlank())
+    private static void processCreation(ProcessBuilder pb, String outputFile, String errorFile,boolean appendOutput, boolean appendError) throws IOException,  InterruptedException {
+        if(!outputFile.isBlank())
         {
-            pb.redirectOutput(FindPath.getAbsolutePath(outputFile).toFile());
-            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            if(appendOutput)
+            {
+                pb.redirectOutput(ProcessBuilder.Redirect.appendTo(FindPath.getAbsolutePath(outputFile).toFile()));
+            }
+            else {
+                pb.redirectOutput(FindPath.getAbsolutePath(outputFile).toFile());
+            }
         }
-        else if(outputFile.isBlank() && !errorFile.isBlank())
-        {
-            pb.redirectError(FindPath.getAbsolutePath(errorFile).toFile());
+        else {
             pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         }
-        Process p = pb.start();
-        p.waitFor();
-    }
-    public static void processCreation(ProcessBuilder pb) throws IOException,  InterruptedException {
+         if(!errorFile.isBlank())
+        {
+            if(appendError)
+            {
+                pb.redirectError(ProcessBuilder.Redirect.appendTo(FindPath.getAbsolutePath(errorFile).toFile()));
+            }
+            else{
+                pb.redirectError(FindPath.getAbsolutePath(errorFile).toFile());
+            }
+        } else{
+             pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+         }
 
-        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         Process p = pb.start();
         p.waitFor();
     }
-    public static boolean wasCommandFound(String command) {
+    private static boolean wasCommandFound(String command) {
 
         return !FindPath.checkExecutable(command).isEmpty();
     }
-    public static void runCommands(String command, List<String> userList, String outputFile, String errorFile) {
+    public static void runCommands(String command, List<String> userList, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
         if (!wasCommandFound(command)) {
             System.err.println(command + ": command not found");
         }
         else {
-            Path currentPath = Path.of(BuiltinCommands.getCurrentPath());
             ProcessBuilder pb = new ProcessBuilder( userList);
             // directory as cd can change the directory , we can provide new process their  new directory
             try {
-                if (!outputFile.isBlank() ||!errorFile.isBlank()) {
-                    processCreationFile( pb, outputFile,errorFile);
-                } else {
-                    processCreation( pb);
-                }
+                processCreation( pb, outputFile,errorFile,appendOutput,appendError);
+
             } catch (IOException | InterruptedException e) {
                 System.err.println(command +": "+e.getMessage());
             }

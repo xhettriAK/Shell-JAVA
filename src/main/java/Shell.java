@@ -1,126 +1,157 @@
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static java.nio.file.StandardOpenOption.CREATE;
+
 public class Shell {
 
-    record Information(List<String> usrList, String outputfile, String errorfile, boolean missingFileName) {
+    private record Information(List<String> usrList, String outputfile,
+                       String errorfile, boolean missingFileName,
+                       boolean appendError, boolean appendOutput) {
     }
 
+
     public static Information parsing(String userInput) {
-        char currentQuote = '\0';
         List<String> usrList = new ArrayList<>();
         StringBuilder userBuilder = new StringBuilder();
+        char currentQuote = '\0';
         boolean ordinary = false;
         boolean isthereRedirect = false;
         boolean isthereRedirectReverse = false;
+        boolean appendError = false;
+        boolean appendOutput = false;
+        boolean helper = false;
         String outputFile = "", errorFile = "";
+
         for (int i = 0; i < userInput.length(); i++) {
             char c = userInput.charAt(i);
-            if ((c == '\\' && !ordinary) && (currentQuote == '\"')) {
-                //now check the upcoming char
-                if (i != userInput.length() - 1) {
-                    char upComing = userInput.charAt(i + 1);
-                    if (upComing == '\"') {
-                        userBuilder.append(userInput.charAt(i + 1));
-                        i++;
-                        continue;
-                    } else if (upComing == '\\') {
-                        userBuilder.append(userInput.charAt(i + 1));
-                        i++;
-                        continue;
-                    }
-                }
+            char next = i + 1 < userInput.length() ? userInput.charAt(i + 1) : '\0';
+
+            // Inside double quotes, only escape a quote or another backslash.
+            if (c == '\\' && !ordinary && currentQuote == '"' && (next == '"' || next == '\\')) {
+                userBuilder.append(next);
+                i++;
+                continue;
             }
-            if ((c == '\\' && !ordinary) && (currentQuote == '\0')) {
+            // when  c is \\ for the first time
+            if (c == '\\' && !ordinary && currentQuote == '\0') {
                 ordinary = true;
-            } else if ((c == '\'' || c == '\"') && !ordinary) {
-                currentQuote = switch (currentQuote) {
-                    case '\0' -> c;
-                    case '\'', '\"' -> {
-                        if (c == currentQuote) {
-                            yield '\0';
-                        } else {
-                            userBuilder.append(c);
-                            yield currentQuote;
-                        }
-                    }
-                    default -> currentQuote;
-                };
-            } else if ((c == ' ' || c == '\t') && ordinary) {
-                userBuilder.append(c);
-                ordinary = false;
-            } else if ((c == ' ' || c == '\t') && currentQuote != '\0') {
-                userBuilder.append(c);
-            } else if (c == ' ' || c == '\t') {
-                if (!userBuilder.isEmpty()) {
+                continue;
+            }
+            // c is \' or c== '"' and ordinary is false
+            if ((c == '\'' || c == '"') && !ordinary) {
+                if (currentQuote == '\0') {
+                    currentQuote = c;
+                } else if (currentQuote == c) {
+                    currentQuote = '\0';
+                } else {
+                    userBuilder.append(c);
+                }
+                continue;
+            }
+            // it will put string to list depending whether isthere redirect
+            // is there reverse
+            if (c == ' ' || c == '\t') {
+                if (ordinary || currentQuote != '\0') {
+                    userBuilder.append(c);
+                    ordinary = false;
+                } else if (!userBuilder.isEmpty()) {
                     if (isthereRedirect) {
                         outputFile = userBuilder.toString();
                         isthereRedirect = false;
-                        userBuilder.delete(0, userBuilder.length());
                     } else if (isthereRedirectReverse) {
-                        errorFile =userBuilder.toString();
+                        errorFile = userBuilder.toString();
                         isthereRedirectReverse = false;
-                        userBuilder.delete(0, userBuilder.length());
-                    }
-                    else {
+                    } else {
                         usrList.add(userBuilder.toString());
-                        userBuilder.delete(0, userBuilder.length());
                     }
+                    userBuilder.setLength(0);
                 }
-            } else {
-                if ((c == '2') && currentQuote == '\0' && !ordinary) {
-                    if (i < userInput.length() - 1) {
-                        char upComing = userInput.charAt(i + 1);
-                        if (upComing == '>') {
-                            if(userBuilder.isEmpty()) {
-                                isthereRedirectReverse = true;
-                                i++;
-                                continue;
-                            }
+                continue;
+            }
+            // check only when there is no backslash
+            if (currentQuote == '\0' && !ordinary) {
+                if ((c == '1' || c == '2') && next == '>' && userBuilder.isEmpty()) {
+                    if (c == '1') {
+                        isthereRedirect = true;
+                        if(i+2<userInput.length()&& userInput.charAt(i+2)=='>')
+                        {
+                            appendOutput=true;
+                            i++;
+                        }
+                        else{
+                            appendOutput=false;
+                        }
+                    } else {
+                        isthereRedirectReverse = true;
+                        if(i+2<userInput.length() && userInput.charAt(i+2)=='>')
+                        {
+                            appendError=true;
+                            i++;
+                        }
+                        else{
+                            appendError=false;
                         }
                     }
-                } else if ((c == '1' && currentQuote == '\0') && !ordinary) {
-                    if (i < userInput.length() - 1) {
-                        char upComing = userInput.charAt(i + 1);
-                        if (upComing == '>') {
-                           if(userBuilder.isEmpty()) {
-                               isthereRedirect = true;
-                               i++;
-                               continue;
-                           }
+                    i++;
+                    continue;
+                }
+
+                if (c == '>') {
+
+                    if (next == '>') {
+                        appendOutput = true;
+                        i++;
+                    }
+                    else{
+                        appendOutput=false;
+                    }
+                    if (!userBuilder.isEmpty()) {
+                        if (isthereRedirect) {
+                            outputFile = userBuilder.toString();
+                            isthereRedirect = false;
+                        } else if (isthereRedirectReverse) {
+                            errorFile = userBuilder.toString();
+                            isthereRedirectReverse = false;
+                        } else {
+                            usrList.add(userBuilder.toString());
                         }
+                        userBuilder.setLength(0);
                     }
-                } else if ((c == '>' && currentQuote == '\0') && !ordinary) {
-                    if(!userBuilder.isEmpty()) {
-                        usrList.add(userBuilder.toString());
-                        userBuilder.delete(0, userBuilder.length());
-                    }
+
                     isthereRedirect = true;
                     continue;
                 }
-                userBuilder.append(c);
-                ordinary=false;
             }
+            userBuilder.append(c);
+            ordinary = false;
         }
-        if (!userBuilder.isEmpty()) {
 
+        if (!userBuilder.isEmpty()) {
             if (isthereRedirect) {
                 outputFile = userBuilder.toString();
                 isthereRedirect = false;
             } else if (isthereRedirectReverse) {
-                errorFile =userBuilder.toString();
+                errorFile = userBuilder.toString();
                 isthereRedirectReverse = false;
-            }
-            else{
-            usrList.add(userBuilder.toString());
+            } else {
+                usrList.add(userBuilder.toString());
             }
         }
-        return new Information(usrList, outputFile, errorFile, isthereRedirect || isthereRedirectReverse);
 
+        return new Information(
+                usrList,
+                outputFile,
+                errorFile,
+                isthereRedirect || isthereRedirectReverse,
+                appendError,
+                appendOutput
+        );
     }
 
     public static void run(Scanner input) {
@@ -149,24 +180,23 @@ public class Shell {
                     PrintStream originalOut = System.out;
                     PrintStream originalError = System.err;
                     if (!l.outputfile.isBlank()) {
-
-
                         try {
-                            System.setOut(new PrintStream(FindPath.getAbsolutePath(l.outputfile).toFile()));
 
-                        } catch (FileNotFoundException e) {
+                            System.setOut(createPrintStream(l.appendOutput,l.outputfile()));
+
+                        } catch (IOException e) {
                             System.setOut(originalOut);
                             System.out.println(l.outputfile + ": no file or directory");
                             continue;
                         }
                     }
-                     if(!l.errorfile.isBlank())
+                    if(!l.errorfile.isBlank())
                     {
 
                         try {
-                            System.setErr(new PrintStream(FindPath.getAbsolutePath(l.errorfile).toFile()));
+                            System.setErr(createPrintStream(l.appendError, l.errorfile));
 
-                        } catch (FileNotFoundException e) {
+                        } catch (IOException e) {
                             System.setErr(originalError);
                             System.out.println( l.errorfile+ ": no file or directory");
                         }
@@ -177,10 +207,17 @@ public class Shell {
                     System.setErr(originalError);
                 }
                 else{
-                    ExternalCommands.runCommands(command,userList, l.outputfile, l.errorfile);
+                    ExternalCommands.runCommands(command,userList, l.outputfile, l.errorfile, l.appendOutput,l.appendError);
                 }
             }
         }
     }
+    public static PrintStream createPrintStream (boolean isAppendTrue, String fileName) throws IOException {
+        if (isAppendTrue) {
+            return new PrintStream(Files.newOutputStream(FindPath.getAbsolutePath(fileName), CREATE, StandardOpenOption.APPEND));
+        }
+        return new PrintStream(Files.newOutputStream(FindPath.getAbsolutePath(fileName)));
+    }
+
 }
 
