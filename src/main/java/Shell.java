@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -158,16 +159,12 @@ public class Shell {
     {
         for(var command : BuiltinCommands.listCommands)
         {
-            if(user.equals(command))
-            {
-                return " ";
-            }
-            else if(command.startsWith(user))
+            if(command.startsWith(user))
             {
                return command.substring(user.length());
             }
         }
-        return "";
+        return null;
     }
     public static String getuserInput(BufferedReader reader )throws  IOException
     {
@@ -192,10 +189,13 @@ public class Shell {
                     userBuilder.append(user);
                 } else if (user == '\t') {
                    String temp =  tabcomplete(userBuilder.toString());
-                   if(!temp.isEmpty())
+                   if(temp!=null)
                    {
                        userBuilder.append(temp).append(' ');
                        System.out.print(temp+" ");
+                   }
+                   else{
+                       System.out.print("\u0007");
                    }
                 }
             }
