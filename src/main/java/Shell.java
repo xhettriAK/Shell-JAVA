@@ -194,8 +194,8 @@ public class Shell {
                    String temp =  tabcomplete(userBuilder.toString());
                    if(!temp.isEmpty())
                    {
-                       userBuilder.append(temp).append(" ");
-                       System.out.print(temp);
+                       userBuilder.append(temp);
+                       System.out.print(temp+" ");
                    }
                 }
             }
