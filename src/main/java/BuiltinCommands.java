@@ -4,10 +4,11 @@ import java.util.List;
 
 public class BuiltinCommands {
 
-    public final static  String[]listCommands= {"echo","exit","pwd","type","cd"};
+    public final static  String[]listCommands= {"echo","exit","pwd","type","cd",};
 
 
     private static String path= Path.of("").toAbsolutePath().toString();
+
     public static String getCurrentPath()
     {
         return path;
@@ -22,7 +23,7 @@ public class BuiltinCommands {
         }
         return false;
     }
-    public static void runCommands( String command, List<String> userArgument )
+     static void runCommands( String command, List<String> userArgument )
     {
         StringBuilder argumentBuilder = new StringBuilder();
         for(var i : userArgument)
@@ -42,18 +43,18 @@ public class BuiltinCommands {
             case "cd" ->cdFunction(userArg);
         }
     }
-    public static void echoFunction(String userArgument) {
+    private static void echoFunction(String userArgument) {
 
             System.out.println(userArgument);
     }
 
 
-    public static void pwdFunction() {
+    private static void pwdFunction() {
         System.out.println(path);
 
 
     }
-    public static void typeFunction(String userArgument)
+    private static void typeFunction(String userArgument)
     {
         if (isThisBuiltin(userArgument)) {
             System.out.println(userArgument + " is a shell builtin");
@@ -63,7 +64,7 @@ public class BuiltinCommands {
 
     }
 
-    public static void cdFunction(String userArgument)
+    private static void cdFunction(String userArgument)
     {
         Path tempPath;
         String username = System.getenv("USER");

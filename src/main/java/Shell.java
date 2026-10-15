@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -153,20 +154,68 @@ public class Shell {
                 appendOutput
         );
     }
+    public static String tabcomplete(String user)
+    {
+        for(var command : BuiltinCommands.listCommands)
+        {
+            if(user.equals(command))
+            {
+                return " ";
+            }
+            else if(command.startsWith(user))
+            {
+               return command.substring(user.length());
+            }
+        }
+        return "";
+    }
+    public static String getuserInput(BufferedReader reader )throws  IOException
+    {
+        char user;
+        int data;
+        StringBuilder userBuilder = new StringBuilder();
+        ValueRange range = ValueRange.of(32, 126);
 
-    public static void run(Scanner input) {
-        String user;
+        while(((data=reader.read())!=-1 )) {
+            user = (char)data;
+            if(range.isValidValue(data))
+            {
+                userBuilder.append(user);
+                System.out.print(user);
+            }
+            else {
+                if (user == '\n') {
+                    System.out.println();
+                    break;
+                }
+                if (user == '\t' && (userBuilder.indexOf(" ") != -1 || userBuilder.isEmpty())) { //tab{if(userBuilder.isEmpty()) {
+                    userBuilder.append(user);
+                } else if (user == '\t') {
+                   String temp =  tabcomplete(userBuilder.toString());
+                   if(!temp.isEmpty())
+                   {
+                       userBuilder.append(temp);
+                       System.out.print(temp);
+                   }
+                }
+            }
+
+        }
+        return userBuilder.toString();
+    }
+    public static void run(BufferedReader reader) throws IOException  {
+        String userInput="";
         while (true) {
             System.out.print("$ ");
-            user = input.nextLine();
-            if (user.isBlank()) {
+            userInput =  getuserInput(reader);
+            if (userInput.isBlank()) {
                 continue;
             }
-            if("exit".equals(user))
+            if("exit".equals(userInput))
             {
                 break;
             }
-            Information l = parsing(user);
+            Information l = parsing(userInput);
             List<String> userList = new ArrayList<>(l.usrList);
 
             List<String> userArgument = new ArrayList<>();
@@ -176,13 +225,12 @@ public class Shell {
                 System.out.println("Expected a string, but found end of the input");
             } else {
                 if (BuiltinCommands.isThisBuiltin(command)) {
-                    boolean error_produce = false;
                     PrintStream originalOut = System.out;
                     PrintStream originalError = System.err;
                     if (!l.outputfile.isBlank()) {
                         try {
 
-                            System.setOut(createPrintStream(l.appendOutput,l.outputfile()));
+                            System.setOut(createPrintStream(l.appendOutput,l.outputfile));
 
                         } catch (IOException e) {
                             System.setOut(originalOut);
