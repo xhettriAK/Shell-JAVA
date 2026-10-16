@@ -205,7 +205,7 @@ public class Shell {
                            if(user=='\t') {
                                System.out.println();
                                for (var i : list) {
-                                   System.out.println(i+" ");
+                                   System.out.print(i+" ");
 
                                }
                                break;
