@@ -206,9 +206,9 @@ public class Shell {
                                System.out.println();
                                for (var i : list) {
                                    System.out.print(i+" ");
-
                                }
-                               break;
+                               System.out.println();
+                               return "";//beak the inner loop
                            }
                        }
                        else {
