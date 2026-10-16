@@ -29,7 +29,7 @@ public class Mode {
     private static boolean  enableRaw(){
         int status  = -1;
 
-            ProcessBuilder raw = new ProcessBuilder("stty", "-echo", "-icanon");
+            ProcessBuilder raw = new ProcessBuilder("stty", "-echo", "-icanon","-isig","-ixon","-iexten");
             raw.redirectInput(ProcessBuilder.Redirect.INHERIT);
             try {
                 Process P = raw.start();

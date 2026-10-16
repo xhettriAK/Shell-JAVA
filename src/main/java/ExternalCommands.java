@@ -1,13 +1,17 @@
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class ExternalCommands {
 
-    public static String  tabCompletionForExternal(String user)
+
+    public static Set<String>  tabCompletionForExternal(String user)
     {
+        Set<String>list = new HashSet<>();
         String pathEnv = System.getenv("PATH");
         String[] paths = pathEnv.split(File.pathSeparator);
         String temp;
@@ -19,7 +23,7 @@ public class ExternalCommands {
                     for (Path value : filename) {
                         String name = value.getFileName().toString();
                         if (name.startsWith(user) && Files.isRegularFile(value) && Files.isExecutable(value)) {
-                            return name.substring(user.length());
+                                    list.add(name);
                         }
                     }
                 } catch (IOException e) {
@@ -27,7 +31,11 @@ public class ExternalCommands {
                 }
             }
         }
-        return null;
+        if(list.isEmpty()) {
+            return null;
+        }
+        return list;
+
     }
 
     private static void processCreation(ProcessBuilder pb, String outputFile, String errorFile,boolean appendOutput, boolean appendError) throws IOException,  InterruptedException {

@@ -7,6 +7,7 @@ import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 
@@ -167,10 +168,19 @@ public class Shell {
             user = (char)data;
             if(range.isValidValue(data))
             {
-                userBuilder.append(user);
                 System.out.print(user);
+                userBuilder.append(user);
+
             }
             else {
+                if(user=='\u0008'||user==127)//backsapce
+                {
+                    if(!userBuilder.isEmpty())
+                    {
+                        userBuilder.deleteCharAt(userBuilder.length()-1);
+                        System.out.print("\b \b");
+                    }
+                }
                 if (user == '\n') {
                     System.out.println();
                     break;
@@ -185,11 +195,21 @@ public class Shell {
                        System.out.print(temp+" ");
                    }
                    else{
-                       temp = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
-                       if(temp!=null)
+                       Set<String>list = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
+                       if(list!=null)
                        {
-                           userBuilder.append(temp).append(' ');
-                           System.out.print(temp+" ");
+                           if(user=='\t')
+                           {
+                               System.out.print("\u0007");
+                           }
+                           if(user=='\t') {
+                               System.out.println();
+                               for (var i : list) {
+                                   System.out.println(i+" ");
+
+                               }
+                               break;
+                           }
                        }
                        else {
                            System.out.print("\u0007");
