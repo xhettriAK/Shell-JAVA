@@ -1,8 +1,12 @@
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLOutput;
+import java.util.List;
+import java.util.stream.Stream;
 
 public  class FindPath {
     public static String checkExecutable(String filename) {
@@ -19,6 +23,7 @@ public  class FindPath {
         }
         return "";
     }
+
 
     public static Path getAbsolutePath(String filename) {
 

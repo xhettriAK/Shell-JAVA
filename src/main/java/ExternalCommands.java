@@ -1,8 +1,34 @@
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ExternalCommands {
+
+    public static String  tabCompletionForExternal(String user)
+    {
+        String pathEnv = System.getenv("PATH");
+        String[] paths = pathEnv.split(File.pathSeparator);
+        String temp;
+        for (String path : paths) {
+            Path p = Path.of(path);
+            if (Files.isDirectory(p)) {
+                try (Stream<Path> stream = Files.list(p).sorted()) {
+                    List<Path> filename =stream.toList();
+                    for (Path value : filename) {
+                        String name = value.getFileName().toString();
+                        if (name.startsWith(user) && Files.isRegularFile(value) && Files.isExecutable(value)) {
+                            return name.substring(user.length());
+                        }
+                    }
+                } catch (IOException e) {
+                    System.out.print("");//skipping unreadable directories;
+                }
+            }
+        }
+        return null;
+    }
 
     private static void processCreation(ProcessBuilder pb, String outputFile, String errorFile,boolean appendOutput, boolean appendError) throws IOException,  InterruptedException {
         if(!outputFile.isBlank())

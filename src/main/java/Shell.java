@@ -155,17 +155,7 @@ public class Shell {
                 appendOutput
         );
     }
-    public static String tabcomplete(String user)
-    {
-        for(var command : BuiltinCommands.listCommands)
-        {
-            if(command.startsWith(user))
-            {
-               return command.substring(user.length());
-            }
-        }
-        return null;
-    }
+
     public static String getuserInput(BufferedReader reader )throws  IOException
     {
         char user;
@@ -188,14 +178,22 @@ public class Shell {
                 if (user == '\t' && (userBuilder.indexOf(" ") != -1 || userBuilder.isEmpty())) { //tab{if(userBuilder.isEmpty()) {
                     userBuilder.append(user);
                 } else if (user == '\t') {
-                   String temp =  tabcomplete(userBuilder.toString());
+                   String temp =  BuiltinCommands.tabCompletionForBuiltin(userBuilder.toString());
                    if(temp!=null)
                    {
                        userBuilder.append(temp).append(' ');
                        System.out.print(temp+" ");
                    }
                    else{
-                       System.out.print("\u0007");
+                       temp = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
+                       if(temp!=null)
+                       {
+                           userBuilder.append(temp).append(' ');
+                           System.out.print(temp+" ");
+                       }
+                       else {
+                           System.out.print("\u0007");
+                       }
                    }
                 }
             }

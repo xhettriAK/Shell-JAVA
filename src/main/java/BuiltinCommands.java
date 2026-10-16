@@ -6,7 +6,17 @@ public class BuiltinCommands {
 
     public final static  String[]listCommands= {"echo","exit","pwd","type","cd",};
 
-
+    public static String tabCompletionForBuiltin(String user)
+    {
+        for(var command : BuiltinCommands.listCommands)
+        {
+            if(command.startsWith(user))
+            {
+                return command.substring(user.length());
+            }
+        }
+        return null;
+    }
     private static String path= Path.of("").toAbsolutePath().toString();
 
     public static String getCurrentPath()
