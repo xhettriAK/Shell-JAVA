@@ -206,12 +206,24 @@ public class Shell {
                                System.out.print("\u0007");
                            }
                            if(user=='\t') {
-                               System.out.println();
-                               for (var i : list) {
-                                   System.out.print(i+" ");
+
+                               if(list.size()==1)
+                               {
+                                   for(var i: list)
+                                   {
+                                       i = i.substring(userBuilder.toString().length());
+                                       userBuilder.append(i).append(' ');
+                                       System.out.print(i+" ");
+                                   }
                                }
-                               System.out.println();
-                               System.out.print("$ "+userBuilder.toString());
+                               else {
+                                   System.out.println();
+                                   for (var i : list) {
+                                       System.out.print(i + " ");
+                                   }
+                                   System.out.println();
+                                   System.out.print("$ " + userBuilder.toString());
+                               }
                            }
                        }
                        else {
