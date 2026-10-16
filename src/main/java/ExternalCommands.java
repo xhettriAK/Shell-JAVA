@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 public class ExternalCommands {
@@ -11,7 +12,7 @@ public class ExternalCommands {
 
     public static Set<String>  tabCompletionForExternal(String user)
     {
-        Set<String>list = new HashSet<>();
+        Set<String>list = new TreeSet<>();
         String pathEnv = System.getenv("PATH");
         String[] paths = pathEnv.split(File.pathSeparator);
         String temp;
