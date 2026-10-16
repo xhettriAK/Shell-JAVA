@@ -20,6 +20,7 @@ public class Shell {
 
 
     public static Information parsing(String userInput) {
+
         List<String> usrList = new ArrayList<>();
         StringBuilder userBuilder = new StringBuilder();
         char currentQuote = '\0';
@@ -165,7 +166,9 @@ public class Shell {
         ValueRange range = ValueRange.of(32, 126);
 
         while(((data=reader.read())!=-1 )) {
+
             user = (char)data;
+
             if(range.isValidValue(data))
             {
                 System.out.print(user);
@@ -208,7 +211,7 @@ public class Shell {
                                    System.out.print(i+" ");
                                }
                                System.out.println();
-                               return "";//beak the inner loop
+                               System.out.print("$ "+userBuilder.toString());
                            }
                        }
                        else {
@@ -223,6 +226,7 @@ public class Shell {
     }
     public static void run(BufferedReader reader) throws IOException  {
         String userInput="";
+
         while (true) {
             System.out.print("$ ");
             userInput =  getuserInput(reader);
