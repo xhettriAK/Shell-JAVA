@@ -1,21 +1,18 @@
-import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 
 public class Shell {
 
-    private record Information(List<String> usrList, String outputfile,
-                       String errorfile, boolean missingFileName,
-                       boolean appendError, boolean appendOutput) {
+    private record Information(List<String> usrList, String outputFile,
+                               String errorFile, boolean missingFileName,
+                               boolean appendError, boolean appendOutput) {
     }
 
 
@@ -158,6 +155,22 @@ public class Shell {
         );
     }
 
+    public static String longestPrefix(List<String>user)
+    {
+        StringBuilder prefix= new StringBuilder();
+        String firstWord = user.getFirst();
+        String lastWord = user.getLast();
+        for(int i=0; i<firstWord.length();i++)
+        {
+            if(firstWord.charAt(i)!=lastWord.charAt(i)) {
+                    return prefix.toString();
+            }
+            else {
+                    prefix.append(lastWord.charAt(i));
+            }
+        }
+        return prefix.toString();
+    }
     public static String getuserInput(BufferedReader reader )throws  IOException
     {
         char user;
@@ -188,7 +201,8 @@ public class Shell {
                     System.out.println();
                     break;
                 }
-                if (user == '\t' && (userBuilder.indexOf(" ") != -1 || userBuilder.isEmpty())) { //tab{if(userBuilder.isEmpty()) {
+                if (user == '\t' && (userBuilder.indexOf(" ") != -1 || userBuilder.isEmpty())) {
+                    //tab{if(userBuilder.isEmpty())
                     userBuilder.append(user);
                 } else if (user == '\t') {
                    String temp =  BuiltinCommands.tabCompletionForBuiltin(userBuilder.toString());
@@ -199,32 +213,35 @@ public class Shell {
                    }
                    else{
                        Set<String>list = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
-                       if(list!=null)
-                       {
-                           if(user=='\t')
-                           {
-                               System.out.print("\u0007");
-                           }
-                           if(user=='\t') {
-
-                               if(list.size()==1)
-                               {
-                                   for(var i: list)
-                                   {
-                                       i = i.substring(userBuilder.toString().length());
+                       if(!list.isEmpty())
+                       {  String prefix = longestPrefix(new ArrayList<>(list));
+                               if (user == '\t') {
+                                   System.out.print("\u0007");
+                               }
+                               if (user == '\t') {
+                                   if(prefix.isEmpty() || userBuilder.toString().equals(prefix)){
+                                       if (list.size() == 1) {
+                                           for (var i : list) {
+                                               i = i.substring(userBuilder.toString().length());
+                                               userBuilder.append(i).append(' ');
+                                               System.out.print(i + " ");
+                                           }
+                                       } else {
+                                           System.out.println();
+                                           for (var i : list) {
+                                               System.out.print(i + " ");
+                                           }
+                                           System.out.println();
+                                           System.out.print("$ " + userBuilder.toString());
+                                       }
+                                   }
+                                   else {
+                                       String i = prefix.substring(userBuilder.toString().length());
                                        userBuilder.append(i).append(' ');
-                                       System.out.print(i+" ");
-                                   }
-                               }
-                               else {
-                                   System.out.println();
-                                   for (var i : list) {
                                        System.out.print(i + " ");
+
                                    }
-                                   System.out.println();
-                                   System.out.print("$ " + userBuilder.toString());
                                }
-                           }
                        }
                        else {
                            System.out.print("\u0007");
@@ -261,26 +278,26 @@ public class Shell {
                 if (BuiltinCommands.isThisBuiltin(command)) {
                     PrintStream originalOut = System.out;
                     PrintStream originalError = System.err;
-                    if (!l.outputfile.isBlank()) {
+                    if (!l.outputFile.isBlank()) {
                         try {
 
-                            System.setOut(createPrintStream(l.appendOutput,l.outputfile));
+                            System.setOut(createPrintStream(l.appendOutput,l.outputFile));
 
                         } catch (IOException e) {
                             System.setOut(originalOut);
-                            System.out.println(l.outputfile + ": no file or directory");
+                            System.out.println(l.outputFile + ": no file or directory");
                             continue;
                         }
                     }
-                    if(!l.errorfile.isBlank())
+                    if(!l.errorFile.isBlank())
                     {
 
                         try {
-                            System.setErr(createPrintStream(l.appendError, l.errorfile));
+                            System.setErr(createPrintStream(l.appendError, l.errorFile));
 
                         } catch (IOException e) {
                             System.setErr(originalError);
-                            System.out.println( l.errorfile+ ": no file or directory");
+                            System.out.println( l.errorFile + ": no file or directory");
                         }
                     }
                     userArgument = userList.subList(1,userList.toArray().length);
@@ -289,7 +306,7 @@ public class Shell {
                     System.setErr(originalError);
                 }
                 else{
-                    ExternalCommands.runCommands(command,userList, l.outputfile, l.errorfile, l.appendOutput,l.appendError);
+                    ExternalCommands.runCommands(command,userList, l.outputFile, l.errorFile, l.appendOutput,l.appendError);
                 }
             }
         }

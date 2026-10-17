@@ -9,7 +9,7 @@ public class  Main {
            Shell.run(reader);
 
         } catch (Exception e) {
-            System.out.println("something went wrong");
+            System.out.println("Something went wrong");
         }
 
     }

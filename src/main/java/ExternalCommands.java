@@ -33,7 +33,7 @@ public class ExternalCommands {
             }
         }
         if(list.isEmpty()) {
-            return null;
+            return list;
         }
         return list;
 
