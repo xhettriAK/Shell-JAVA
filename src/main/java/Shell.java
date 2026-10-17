@@ -209,7 +209,7 @@ public class Shell {
                    if(temp!=null)
                    {
                        userBuilder.append(temp).append(' ');
-                       System.out.print(temp+" ");
+                       System.out.print(temp+' ');
                    }
                    else{
                        Set<String>list = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
@@ -219,12 +219,12 @@ public class Shell {
                                    System.out.print("\u0007");
                                }
                                if (user == '\t') {
-                                   if(prefix.isEmpty() || userBuilder.toString().equals(prefix)){
+                                   if(list.size()==1|| prefix.isEmpty() || userBuilder.toString().equals(prefix)){
                                        if (list.size() == 1) {
                                            for (var i : list) {
                                                i = i.substring(userBuilder.toString().length());
                                                userBuilder.append(i).append(' ');
-                                               System.out.print(i + " ");
+                                               System.out.print(i + ' ');
                                            }
                                        } else {
                                            System.out.println();
@@ -237,7 +237,7 @@ public class Shell {
                                    }
                                    else {
                                        String i = prefix.substring(userBuilder.toString().length());
-                                       userBuilder.append(i).append(' ');
+                                       userBuilder.append(i);
                                        System.out.print(i);
 
                                    }

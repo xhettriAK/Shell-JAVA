@@ -19,11 +19,11 @@ public class ExternalCommands {
         for (String path : paths) {
             Path p = Path.of(path);
             if (Files.isDirectory(p)) {
-                try (Stream<Path> stream = Files.list(p).sorted()) {
+                try (Stream<Path> stream = Files.list(p).sorted()) { //files.list return name
                     List<Path> filename =stream.toList();
                     for (Path value : filename) {
                         String name = value.getFileName().toString();
-                        if (name.startsWith(user) && Files.isRegularFile(value) && Files.isExecutable(value)) {
+                        if (!name.equals((user))&& name.startsWith(user) && Files.isRegularFile(value) && Files.isExecutable(value)) {
                                     list.add(name);
                         }
                     }
