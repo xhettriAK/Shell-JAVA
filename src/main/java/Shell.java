@@ -238,7 +238,7 @@ public class Shell {
                                    else {
                                        String i = prefix.substring(userBuilder.toString().length());
                                        userBuilder.append(i).append(' ');
-                                       System.out.print(i + " ");
+                                       System.out.print(i);
 
                                    }
                                }
