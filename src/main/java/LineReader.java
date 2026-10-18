@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Set;
 public class LineReader {
     private  boolean previousKeyWasTab = false;
     private  StringBuilder inputBuilder = new StringBuilder();
+    private boolean isdirectory = false;
 
     private  void  handleBackSpace()
     {
@@ -60,6 +63,13 @@ public class LineReader {
                 }
 
                 Set<String> matches = PathUtils.findFileCompletions(directory,filePrefix);
+                if(matches.size()==1)
+                {
+                    if(Files.isDirectory(Path.of(directory + matches.iterator().next())))
+                    {
+                        isdirectory = true;
+                    }
+                }
                 applyCompletionMatches(filePrefix,matches);
 
             } else {
@@ -138,8 +148,14 @@ public class LineReader {
         String completionSuffix = "";
         if (matches.size() == 1) {
             for (var match : matches) {
-                completionSuffix = match.substring(prefix.length())+' ';
+                if(isdirectory) {
+                    completionSuffix = match.substring(prefix.length()).stripTrailing() +'/';
+                    isdirectory =false;
+                }else{
+                    completionSuffix = match.substring(prefix.length()) +' ';
+                }
                 System.out.print(completionSuffix);
+
             }
         } else {
             System.out.println();
