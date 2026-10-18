@@ -10,7 +10,8 @@ import java.util.Set;
 public class LineReader {
     private  boolean previousKeyWasTab = false;
     private  StringBuilder inputBuilder = new StringBuilder();
-    private boolean isdirectory = false;
+    private boolean isDirectory = false;
+    private boolean fileOrDirectory = false;
 
     private  void  handleBackSpace()
     {
@@ -39,7 +40,8 @@ public class LineReader {
             inputBuilder.append(inputCharacter);
         } else {
             if (inputBuilder.toString().contains(" ")) {
-                String prefix = inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
+                fileOrDirectory = true;
+                String prefix =inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
                 String directory = "";
                 String filePrefix = "";
                 int lastSlash = prefix.lastIndexOf('/');
@@ -67,7 +69,7 @@ public class LineReader {
                 {
                     if(Files.isDirectory(Path.of(directory + matches.iterator().next())))
                     {
-                        isdirectory = true;
+                        isDirectory = true;
                     }
                 }
                 applyCompletionMatches(filePrefix,matches);
@@ -122,9 +124,21 @@ public class LineReader {
             if (matches.size() > 1) {
                 commonPrefix = findCommonPrefix(new ArrayList<>(matches));
                 if (!commonPrefix.isEmpty()) {
-                    if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
-                        System.out.print("\u0007");
-                        previousKeyWasTab = true;
+                    if(fileOrDirectory)
+                    {
+                        if (inputBuilder.substring(inputBuilder.indexOf(" ")).equals(commonPrefix) && !previousKeyWasTab) {
+
+                            System.out.print("\u0007");
+                            previousKeyWasTab = true;
+                        }
+                        fileOrDirectory =false;
+                    }
+                    else {
+                        if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
+
+                            System.out.print("\u0007");
+                            previousKeyWasTab = true;
+                        }
                     }
                 }
             }
@@ -148,9 +162,9 @@ public class LineReader {
         String completionSuffix = "";
         if (matches.size() == 1) {
             for (var match : matches) {
-                if(isdirectory) {
+                if(isDirectory) {
                     completionSuffix = match.substring(prefix.length()).stripTrailing() +'/';
-                    isdirectory =false;
+                    isDirectory =false;
                 }else{
                     completionSuffix = match.substring(prefix.length()) +' ';
                 }
