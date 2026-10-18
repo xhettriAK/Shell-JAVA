@@ -1,7 +1,6 @@
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -10,7 +9,7 @@ import java.util.stream.Stream;
 public class ExternalCommands {
 
 
-    public static Set<String>  tabCompletionForExternal(String user)
+    public static Set<String>  tabCompletionForExternal(String prefix)
     {
         Set<String>list = new TreeSet<>();
         String pathEnv = System.getenv("PATH");
@@ -19,11 +18,11 @@ public class ExternalCommands {
         for (String path : paths) {
             Path p = Path.of(path);
             if (Files.isDirectory(p)) {
-                try (Stream<Path> stream = Files.list(p).sorted()) { //files.list return name
+                try (Stream<Path> stream = Files.list(p)) { //files.list return name
                     List<Path> filename =stream.toList();
                     for (Path value : filename) {
                         String name = value.getFileName().toString();
-                        if (!name.equals((user))&& name.startsWith(user) && Files.isRegularFile(value) && Files.isExecutable(value)) {
+                        if ( name.startsWith(prefix) && Files.isRegularFile(value) && Files.isExecutable(value)) {
                                     list.add(name);
                         }
                     }
@@ -32,22 +31,19 @@ public class ExternalCommands {
                 }
             }
         }
-        if(list.isEmpty()) {
-            return list;
-        }
         return list;
-
     }
+
 
     private static void processCreation(ProcessBuilder pb, String outputFile, String errorFile,boolean appendOutput, boolean appendError) throws IOException,  InterruptedException {
         if(!outputFile.isBlank())
         {
             if(appendOutput)
             {
-                pb.redirectOutput(ProcessBuilder.Redirect.appendTo(FindPath.getAbsolutePath(outputFile).toFile()));
+                pb.redirectOutput(ProcessBuilder.Redirect.appendTo(FilePath.getAbsolutePath(outputFile).toFile()));
             }
             else {
-                pb.redirectOutput(FindPath.getAbsolutePath(outputFile).toFile());
+                pb.redirectOutput(FilePath.getAbsolutePath(outputFile).toFile());
             }
         }
         else {
@@ -57,10 +53,10 @@ public class ExternalCommands {
         {
             if(appendError)
             {
-                pb.redirectError(ProcessBuilder.Redirect.appendTo(FindPath.getAbsolutePath(errorFile).toFile()));
+                pb.redirectError(ProcessBuilder.Redirect.appendTo(FilePath.getAbsolutePath(errorFile).toFile()));
             }
             else{
-                pb.redirectError(FindPath.getAbsolutePath(errorFile).toFile());
+                pb.redirectError(FilePath.getAbsolutePath(errorFile).toFile());
             }
         } else{
              pb.redirectError(ProcessBuilder.Redirect.INHERIT);
@@ -71,7 +67,7 @@ public class ExternalCommands {
     }
     private static boolean wasCommandFound(String command) {
 
-        return !FindPath.checkExecutable(command).isEmpty();
+        return !FilePath.checkExecutable(command).isEmpty();
     }
     public static void runCommands(String command, List<String> userList, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
         if (!wasCommandFound(command)) {

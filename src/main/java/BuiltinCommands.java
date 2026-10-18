@@ -69,7 +69,7 @@ public class BuiltinCommands {
         if (isThisBuiltin(userArgument)) {
             System.out.println(userArgument + " is a shell builtin");
         } else {
-            FindPath.filePath(userArgument);
+            FilePath.filePath(userArgument);
         }
 
     }

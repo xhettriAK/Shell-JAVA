@@ -14,7 +14,7 @@ public class Shell {
                                String errorFile, boolean missingFileName,
                                boolean appendError, boolean appendOutput) {
     }
-
+    private static boolean  isPreviousKeyTab = false;
 
     public static Information parsing(String userInput) {
 
@@ -26,7 +26,7 @@ public class Shell {
         boolean isthereRedirectReverse = false;
         boolean appendError = false;
         boolean appendOutput = false;
-        boolean helper = false;
+
         String outputFile = "", errorFile = "";
 
         for (int i = 0; i < userInput.length(); i++) {
@@ -55,7 +55,7 @@ public class Shell {
                 }
                 continue;
             }
-            // it will put string to list depending whether isthere redirect
+            // it will put string to list depending whether isthereredirect
             // is there reverse
             if (c == ' ' || c == '\t') {
                 if (ordinary || currentQuote != '\0') {
@@ -155,7 +155,8 @@ public class Shell {
         );
     }
 
-    public static String longestPrefix(List<String>user)
+    public static String findPrefix(List<String>user)
+    //list is sorted| Comparing first and last
     {
         StringBuilder prefix= new StringBuilder();
         String firstWord = user.getFirst();
@@ -171,6 +172,50 @@ public class Shell {
         }
         return prefix.toString();
     }
+    public static String tabCompleteFile(String  filePrefix, Set<String>list, String file)
+    {
+        String temp = "";
+        if (list.size() == 1) {
+            for (var i : list) {
+                temp = i.substring(filePrefix.length())+' ';
+                System.out.print(temp);
+            }
+        } else {
+            System.out.println();
+            for (var i : list) {
+                System.out.print(i + " ");
+            }
+            System.out.println();
+            System.out.print("$ " + file);
+            return "";
+        }
+        return temp;
+
+    }
+    public static String tabCompleteExternal(StringBuilder userBuilder, Set<String>list)
+    {
+        String temp ="";
+        if (list.size() == 1) {
+            for (var i : list) {
+                temp = i.substring(userBuilder.toString().length())+" ";
+                System.out.print(temp);
+            }
+        } else {
+            if(isPreviousKeyTab) {
+
+
+                System.out.println();
+                for (var i : list) {
+                    System.out.print(i + " ");
+                }
+                System.out.println();
+                System.out.print("$ " + userBuilder.toString());
+            }
+            return "";
+        }
+        return temp;
+
+    }
     public static String getuserInput(BufferedReader reader )throws  IOException
     {
         char user;
@@ -180,77 +225,90 @@ public class Shell {
 
         while(((data=reader.read())!=-1 )) {
 
-            user = (char)data;
+            user = (char) data;
 
-            if(range.isValidValue(data))
-            {
+            if (range.isValidValue(data)) {
+                isPreviousKeyTab=false;
                 System.out.print(user);
                 userBuilder.append(user);
 
-            }
-            else {
-                if(user=='\u0008'||user==127)//backsapce
+            } else {
+                if (user == '\u0008' || user == 127)//backsapce
                 {
-                    if(!userBuilder.isEmpty())
-                    {
-                        userBuilder.deleteCharAt(userBuilder.length()-1);
+                    if (!userBuilder.isEmpty()) {
+
+                        userBuilder.deleteCharAt(userBuilder.length() - 1);
                         System.out.print("\b \b");
+
                     }
+                    isPreviousKeyTab=false;
                 }
                 if (user == '\n') {
+                    isPreviousKeyTab=false;
                     System.out.println();
                     break;
                 }
-                if (user == '\t' && (userBuilder.indexOf(" ") != -1 || userBuilder.isEmpty())) {
+                if (user == '\t' && userBuilder.isEmpty()) {
                     //tab{if(userBuilder.isEmpty())
                     userBuilder.append(user);
-                } else if (user == '\t') {
-                   String temp =  BuiltinCommands.tabCompletionForBuiltin(userBuilder.toString());
-                   if(temp!=null)
-                   {
-                       userBuilder.append(temp).append(' ');
-                       System.out.print(temp+' ');
-                   }
-                   else{
-                       Set<String>list = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
-                       if(!list.isEmpty())
-                       {  String prefix = longestPrefix(new ArrayList<>(list));
-                               if (user == '\t') {
-                                   System.out.print("\u0007");
-                               }
-                               if (user == '\t') {
-                                   if(list.size()==1|| prefix.isEmpty() || userBuilder.toString().equals(prefix)){
-                                       if (list.size() == 1) {
-                                           for (var i : list) {
-                                               i = i.substring(userBuilder.toString().length());
-                                               userBuilder.append(i).append(' ');
-                                               System.out.print(i + ' ');
-                                           }
-                                       } else {
-                                           System.out.println();
-                                           for (var i : list) {
-                                               System.out.print(i + " ");
-                                           }
-                                           System.out.println();
-                                           System.out.print("$ " + userBuilder.toString());
-                                       }
-                                   }
-                                   else {
-                                       String i = prefix.substring(userBuilder.toString().length());
-                                       userBuilder.append(i);
-                                       System.out.print(i);
+                }
+                else if (user == '\t' && userBuilder.toString().contains(" ")) {
+                    String filePrefix = userBuilder.substring(userBuilder.lastIndexOf(" ")+1);
+                    Set<String> list = FilePath.tabCompletetionForFile(filePrefix);
+                    if (!list.isEmpty()) {
+                        String prefix = "";
+                        if (list.size() > 1) {
+                            prefix = findPrefix(new ArrayList<>(list));
+                        }
+                        if ((prefix.isEmpty() || filePrefix.equals(prefix))) {
+                            userBuilder.append(tabCompleteFile(filePrefix, list, userBuilder.toString()));
+                        } else {
+                            String i = prefix.substring(filePrefix.length());
+                            userBuilder.append(i);
+                            System.out.print(i);
+                        }
+                    } else {
+                        System.out.print("\u0007");
+                    }
+                }
+                else if (user == '\t') {
+                    String temp = BuiltinCommands.tabCompletionForBuiltin(userBuilder.toString());
+                    if (temp != null) {
+                        userBuilder.append(temp).append(' ');
+                        System.out.print(temp + ' ');
+                    } else {
+                        Set<String> list = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
 
-                                   }
-                               }
-                       }
-                       else {
-                           System.out.print("\u0007");
-                       }
-                   }
+                        if (!list.isEmpty()) {
+                            String prefix = "";
+                            if (list.size() > 1) {
+                                prefix = findPrefix(new ArrayList<>(list));
+                                if(!prefix.isEmpty())
+                                {
+                                    if(userBuilder.toString().equals(prefix) && !isPreviousKeyTab)
+                                    {
+                                        System.out.print("\u0007");
+                                        isPreviousKeyTab=true;
+                                    }
+                                }
+                            }
+                            if ((prefix.isEmpty() || userBuilder.toString().equals(prefix))) {
+
+                                userBuilder.append(tabCompleteExternal(userBuilder, list));
+                            } else {
+                                String i = prefix.substring(userBuilder.toString().length());
+                                userBuilder.append(i);
+                                System.out.print(i);
+                            }
+                        }
+                    }
+
+                }  else {
+                    System.out.print("\u0007");
                 }
             }
-
         }
+
         return userBuilder.toString();
     }
     public static void run(BufferedReader reader) throws IOException  {
@@ -268,8 +326,7 @@ public class Shell {
             }
             Information l = parsing(userInput);
             List<String> userList = new ArrayList<>(l.usrList);
-
-            List<String> userArgument = new ArrayList<>();
+            List<String> userArgument;
 
             String command = userList.getFirst();
             if (l.missingFileName) {
@@ -313,9 +370,9 @@ public class Shell {
     }
     public static PrintStream createPrintStream (boolean isAppendTrue, String fileName) throws IOException {
         if (isAppendTrue) {
-            return new PrintStream(Files.newOutputStream(FindPath.getAbsolutePath(fileName), CREATE, StandardOpenOption.APPEND));
+            return new PrintStream(Files.newOutputStream(FilePath.getAbsolutePath(fileName), CREATE, StandardOpenOption.APPEND));
         }
-        return new PrintStream(Files.newOutputStream(FindPath.getAbsolutePath(fileName)));
+        return new PrintStream(Files.newOutputStream(FilePath.getAbsolutePath(fileName)));
     }
 
 }
