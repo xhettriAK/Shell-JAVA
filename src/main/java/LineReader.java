@@ -135,7 +135,6 @@ public class LineReader {
                     }
                     else {
                         if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
-
                             System.out.print("\u0007");
                             previousKeyWasTab = true;
                         }
@@ -172,13 +171,16 @@ public class LineReader {
 
             }
         } else {
-            System.out.println();
-            for (var match : matches) {
-                System.out.print(match + " ");
+            if(!previousKeyWasTab) {
+                System.err.print("2");
+                System.out.println();
+                for (var match : matches) {
+                    System.out.print(match + " ");
+                }
+                System.out.println();
+                System.out.print("$ " + inputBuilder);
+                return "";
             }
-            System.out.println();
-            System.out.print("$ " + inputBuilder);
-            return "";
         }
         return completionSuffix;
 
