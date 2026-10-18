@@ -40,22 +40,25 @@ public class LineReader {
                 String directory = "";
                 String filePrefix = "";
                 int lastSlash = prefix.lastIndexOf('/');
-                if(lastSlash==prefix.length()-1)
-                {
-                    filePrefix = "";
-                    directory=prefix;
-                }
-                else if(lastSlash!=-1)
-                {
-                    filePrefix = prefix.substring(lastSlash+1);
-                    if(!filePrefix.isEmpty()) {
-                        directory = prefix.substring(0, prefix.lastIndexOf(filePrefix));
-                    };
+                if(prefix.contains("/")){
+                    if (lastSlash == prefix.length() - 1) {
+                        filePrefix = "";
+                        directory = prefix;
+                    } else if (lastSlash != -1) {
+                        filePrefix = prefix.substring(lastSlash + 1);
+                        if (!filePrefix.isEmpty()) {
+                            directory = prefix.substring(0, prefix.lastIndexOf(filePrefix));
+                        }
+
+                    } else{
+                        filePrefix = prefix;
+                        directory = prefix;
+                    }
                 }
                 else{
                     filePrefix = prefix;
-                    directory = prefix;
                 }
+
                 Set<String> matches = PathUtils.findFileCompletions(directory,filePrefix);
                 applyCompletionMatches(filePrefix,matches);
 
