@@ -39,13 +39,18 @@ public class LineReader {
                 String prefix = inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
                 String directory = "";
                 String filePrefix = "";
-                if(prefix.contains("/"))
+                int lastSlash = prefix.lastIndexOf('/');
+                if(lastSlash==prefix.length()-1)
                 {
-                    filePrefix = prefix.substring(prefix.lastIndexOf('/')+1);
-                    if(filePrefix.isEmpty()){
-                        filePrefix = prefix.substring(prefix.lastIndexOf('/')-1);
-                    }
-                    directory = prefix.substring(0,prefix.lastIndexOf(filePrefix));;
+                    filePrefix = "";
+                    directory=prefix;
+                }
+                else if(lastSlash!=-1)
+                {
+                    filePrefix = prefix.substring(lastSlash+1);
+                    if(!filePrefix.isEmpty()) {
+                        directory = prefix.substring(0, prefix.lastIndexOf(filePrefix));
+                    };
                 }
                 else{
                     filePrefix = prefix;

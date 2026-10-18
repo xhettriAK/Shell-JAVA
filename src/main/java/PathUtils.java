@@ -30,7 +30,7 @@ public class PathUtils {
              List<Path> paths = stream.toList();
              for (Path candidate : paths) {
                  String fileName = candidate.getFileName().toString();
-                 if (fileName.startsWith(prefix) && Files.isRegularFile(candidate)) {
+                 if (fileName.startsWith(prefix)) {
                      matches.add(fileName);
                  }
              }
