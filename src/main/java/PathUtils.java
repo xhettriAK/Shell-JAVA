@@ -22,10 +22,10 @@ public class PathUtils {
         }
         return "";
     }
-    public static Set<String> findFileCompletions(String prefix)
+    public static Set<String> findFileCompletions(String directory, String prefix)
     {
         Set<String> matches = new TreeSet<>();
-        Path currentDirectory = Path.of(BuiltInCommands.getCurrentDirectory());
+        Path currentDirectory = Path.of(BuiltInCommands.getCurrentDirectory()).resolve(Path.of(directory));
         try (Stream<Path> stream = Files.list(currentDirectory)) {
              List<Path> paths = stream.toList();
              for (Path candidate : paths) {

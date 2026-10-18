@@ -14,7 +14,7 @@ public class CommandShell {
                                String errorFile, boolean missingFileName,
                                boolean appendError, boolean appendOutput) {
     }
-    private static boolean previousKeyWasTab = false;
+
 
     public static CommandInfo parseCommandLine(String userInput) {
 
@@ -155,166 +155,12 @@ public class CommandShell {
         );
     }
 
-    public static String findCommonPrefix(List<String> user)
-    //list is sorted| Comparing first and last
-    {
-        StringBuilder prefix= new StringBuilder();
-        String firstWord = user.getFirst();
-        String lastWord = user.getLast();
-        for(int i=0; i<firstWord.length();i++)
-        {
-            if(firstWord.charAt(i)!=lastWord.charAt(i)) {
-                    return prefix.toString();
-            }
-            else {
-                    prefix.append(lastWord.charAt(i));
-            }
-        }
-        return prefix.toString();
-    }
-    public static String completeFileName(String filePrefix, Set<String> matches, String input)
-    {
-        String temp = "";
-        if (matches.size() == 1) {
-            for (var match : matches) {
-                temp = match.substring(filePrefix.length())+' ';
-                System.out.print(temp);
-            }
-        } else {
-            System.out.println();
-            for (var match : matches) {
-                System.out.print(match + " ");
-            }
-            System.out.println();
-            System.out.print("$ " + input);
-            return "";
-        }
-        return temp;
-
-    }
-    public static String completeExternalCommand(StringBuilder inputBuilder, Set<String> matches)
-    {
-        String temp ="";
-        if (matches.size() == 1) {
-            for (var match : matches) {
-                temp = match.substring(inputBuilder.toString().length())+" ";
-                System.out.print(temp);
-            }
-        } else {
-            if (previousKeyWasTab) {
-
-
-                System.out.println();
-                for (var match : matches) {
-                    System.out.print(match + " ");
-                }
-                System.out.println();
-                System.out.print("$ " + inputBuilder);
-            }
-            return "";
-        }
-        return temp;
-
-    }
-    public static String readUserInput(BufferedReader reader) throws IOException
-    {
-        char inputCharacter;
-        int inputCode;
-        StringBuilder inputBuilder = new StringBuilder();
-        ValueRange printableCharacters = ValueRange.of(32, 126);
-
-        while (((inputCode = reader.read()) != -1)) {
-
-            inputCharacter = (char) inputCode;
-
-            if (printableCharacters.isValidValue(inputCode)) {
-                previousKeyWasTab = false;
-                System.out.print(inputCharacter);
-                inputBuilder.append(inputCharacter);
-
-            } else {
-                if (inputCharacter == '\u0008' || inputCharacter == 127)
-                {
-                    if (!inputBuilder.isEmpty()) {
-
-                        inputBuilder.deleteCharAt(inputBuilder.length() - 1);
-                        System.out.print("\b \b");
-
-                    }
-                    previousKeyWasTab = false;
-                }
-                if (inputCharacter == '\n') {
-                    previousKeyWasTab = false;
-                    System.out.println();
-                    break;
-                }
-                if (inputCharacter == '\t' && inputBuilder.isEmpty()) {
-                    //tab{if(userBuilder.isEmpty())
-                    inputBuilder.append(inputCharacter);
-                }
-                else if (inputCharacter == '\t' && inputBuilder.toString().contains(" ")) {
-                    String filePrefix = inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
-                    Set<String> matches = PathUtils.findFileCompletions(filePrefix);
-                    if (!matches.isEmpty()) {
-                        String prefix = "";
-                        if (matches.size() > 1) {
-                            prefix = findCommonPrefix(new ArrayList<>(matches));
-                        }
-                        if ((prefix.isEmpty() || filePrefix.equals(prefix))) {
-                            inputBuilder.append(completeFileName(filePrefix, matches, inputBuilder.toString()));
-                        } else {
-                            String completion = prefix.substring(filePrefix.length());
-                            inputBuilder.append(completion);
-                            System.out.print(completion);
-                        }
-                    } else {
-                        System.out.print("\u0007");
-                    }
-                } else if (inputCharacter == '\t') {
-                    String completion = BuiltInCommands.completeBuiltInCommand(inputBuilder.toString());
-                    if (completion != null) {
-                        inputBuilder.append(completion).append(' ');
-                        System.out.print(completion + ' ');
-                    } else {
-                        Set<String> matches = ExternalCommandRunner.findExternalCommandCompletions(inputBuilder.toString());
-                        if (!matches.isEmpty()) {
-                            String prefix = "";
-                            if (matches.size() > 1) {
-                                prefix = findCommonPrefix(new ArrayList<>(matches));
-                                if (!prefix.isEmpty()) {
-                                    if (inputBuilder.toString().equals(prefix) && !previousKeyWasTab) {
-                                        System.out.print("\u0007");
-                                        previousKeyWasTab = true;
-                                    }
-                                }
-                            }
-                            if ((prefix.isEmpty() || inputBuilder.toString().equals(prefix))) { //prefix is excatly one or there is no prefix
-
-                                inputBuilder.append(completeExternalCommand(inputBuilder, matches));
-                            } else {
-                                String completionText = prefix.substring(inputBuilder.toString().length()); //prefix is longer than user
-                                inputBuilder.append(completionText);
-                                System.out.print(completionText);
-                            }
-                        }else{
-                            if(!previousKeyWasTab) { //no matches
-                                System.out.print("\u0007");
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-
-        return inputBuilder.toString();
-    }
     public static void run(BufferedReader reader) throws IOException  {
         String userInput="";
 
         while (true) {
             System.out.print("$ ");
-            userInput = readUserInput(reader);
+            userInput = new LineReader().readUserInput(reader);
             if (userInput.isBlank()) {
                 continue;
             }
