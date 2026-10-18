@@ -270,42 +270,39 @@ public class CommandShell {
                     } else {
                         System.out.print("\u0007");
                     }
-                }
-                else if (inputCharacter == '\t') {
+                } else if (inputCharacter == '\t') {
                     String completion = BuiltInCommands.completeBuiltInCommand(inputBuilder.toString());
                     if (completion != null) {
                         inputBuilder.append(completion).append(' ');
                         System.out.print(completion + ' ');
                     } else {
                         Set<String> matches = ExternalCommandRunner.findExternalCommandCompletions(inputBuilder.toString());
-
                         if (!matches.isEmpty()) {
                             String prefix = "";
                             if (matches.size() > 1) {
                                 prefix = findCommonPrefix(new ArrayList<>(matches));
-                                if (!prefix.isEmpty())
-                                {
-                                    if (inputBuilder.toString().equals(prefix) && !previousKeyWasTab)
-                                    {
+                                if (!prefix.isEmpty()) {
+                                    if (inputBuilder.toString().equals(prefix) && !previousKeyWasTab) {
                                         System.out.print("\u0007");
                                         previousKeyWasTab = true;
                                     }
                                 }
                             }
-                            if ((prefix.isEmpty() || inputBuilder.toString().equals(prefix))) {
+                            if ((prefix.isEmpty() || inputBuilder.toString().equals(prefix))) { //prefix is excatly one or there is no prefix
 
                                 inputBuilder.append(completeExternalCommand(inputBuilder, matches));
                             } else {
-                                String completionText = prefix.substring(inputBuilder.toString().length());
+                                String completionText = prefix.substring(inputBuilder.toString().length()); //prefix is longer than user
                                 inputBuilder.append(completionText);
                                 System.out.print(completionText);
+                            }
+                        }else{
+                            if(!previousKeyWasTab) { //no matches
                                 System.out.print("\u0007");
                             }
                         }
                     }
 
-                } else{
-                    System.out.print("");
                 }
             }
         }
