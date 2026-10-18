@@ -8,15 +8,15 @@ import java.util.Set;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 
-public class Shell {
+public class CommandShell {
 
-    private record Information(List<String> usrList, String outputFile,
+    private record CommandInfo(List<String> commandArguments, String outputFile,
                                String errorFile, boolean missingFileName,
                                boolean appendError, boolean appendOutput) {
     }
-    private static boolean  isPreviousKeyTab = false;
+    private static boolean previousKeyWasTab = false;
 
-    public static Information parsing(String userInput) {
+    public static CommandInfo parseCommandLine(String userInput) {
 
         List<String> usrList = new ArrayList<>();
         StringBuilder userBuilder = new StringBuilder();
@@ -145,7 +145,7 @@ public class Shell {
             }
         }
 
-        return new Information(
+        return new CommandInfo(
                 usrList,
                 outputFile,
                 errorFile,
@@ -155,7 +155,7 @@ public class Shell {
         );
     }
 
-    public static String findPrefix(List<String>user)
+    public static String findCommonPrefix(List<String> user)
     //list is sorted| Comparing first and last
     {
         StringBuilder prefix= new StringBuilder();
@@ -172,151 +172,152 @@ public class Shell {
         }
         return prefix.toString();
     }
-    public static String tabCompleteFile(String  filePrefix, Set<String>list, String file)
+    public static String completeFileName(String filePrefix, Set<String> matches, String input)
     {
         String temp = "";
-        if (list.size() == 1) {
-            for (var i : list) {
-                temp = i.substring(filePrefix.length())+' ';
+        if (matches.size() == 1) {
+            for (var match : matches) {
+                temp = match.substring(filePrefix.length())+' ';
                 System.out.print(temp);
             }
         } else {
             System.out.println();
-            for (var i : list) {
-                System.out.print(i + " ");
+            for (var match : matches) {
+                System.out.print(match + " ");
             }
             System.out.println();
-            System.out.print("$ " + file);
+            System.out.print("$ " + input);
             return "";
         }
         return temp;
 
     }
-    public static String tabCompleteExternal(StringBuilder userBuilder, Set<String>list)
+    public static String completeExternalCommand(StringBuilder inputBuilder, Set<String> matches)
     {
         String temp ="";
-        if (list.size() == 1) {
-            for (var i : list) {
-                temp = i.substring(userBuilder.toString().length())+" ";
+        if (matches.size() == 1) {
+            for (var match : matches) {
+                temp = match.substring(inputBuilder.toString().length())+" ";
                 System.out.print(temp);
             }
         } else {
-            if(isPreviousKeyTab) {
+            if (previousKeyWasTab) {
 
 
                 System.out.println();
-                for (var i : list) {
-                    System.out.print(i + " ");
+                for (var match : matches) {
+                    System.out.print(match + " ");
                 }
                 System.out.println();
-                System.out.print("$ " + userBuilder.toString());
+                System.out.print("$ " + inputBuilder);
             }
             return "";
         }
         return temp;
 
     }
-    public static String getuserInput(BufferedReader reader )throws  IOException
+    public static String readUserInput(BufferedReader reader) throws IOException
     {
-        char user;
-        int data;
-        StringBuilder userBuilder = new StringBuilder();
-        ValueRange range = ValueRange.of(32, 126);
+        char inputCharacter;
+        int inputCode;
+        StringBuilder inputBuilder = new StringBuilder();
+        ValueRange printableCharacters = ValueRange.of(32, 126);
 
-        while(((data=reader.read())!=-1 )) {
+        while (((inputCode = reader.read()) != -1)) {
 
-            user = (char) data;
+            inputCharacter = (char) inputCode;
 
-            if (range.isValidValue(data)) {
-                isPreviousKeyTab=false;
-                System.out.print(user);
-                userBuilder.append(user);
+            if (printableCharacters.isValidValue(inputCode)) {
+                previousKeyWasTab = false;
+                System.out.print(inputCharacter);
+                inputBuilder.append(inputCharacter);
 
             } else {
-                if (user == '\u0008' || user == 127)//backsapce
+                if (inputCharacter == '\u0008' || inputCharacter == 127)
                 {
-                    if (!userBuilder.isEmpty()) {
+                    if (!inputBuilder.isEmpty()) {
 
-                        userBuilder.deleteCharAt(userBuilder.length() - 1);
+                        inputBuilder.deleteCharAt(inputBuilder.length() - 1);
                         System.out.print("\b \b");
 
                     }
-                    isPreviousKeyTab=false;
+                    previousKeyWasTab = false;
                 }
-                if (user == '\n') {
-                    isPreviousKeyTab=false;
+                if (inputCharacter == '\n') {
+                    previousKeyWasTab = false;
                     System.out.println();
                     break;
                 }
-                if (user == '\t' && userBuilder.isEmpty()) {
+                if (inputCharacter == '\t' && inputBuilder.isEmpty()) {
                     //tab{if(userBuilder.isEmpty())
-                    userBuilder.append(user);
+                    inputBuilder.append(inputCharacter);
                 }
-                else if (user == '\t' && userBuilder.toString().contains(" ")) {
-                    String filePrefix = userBuilder.substring(userBuilder.lastIndexOf(" ")+1);
-                    Set<String> list = FilePath.tabCompletetionForFile(filePrefix);
-                    if (!list.isEmpty()) {
+                else if (inputCharacter == '\t' && inputBuilder.toString().contains(" ")) {
+                    String filePrefix = inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
+                    Set<String> matches = PathUtils.findFileCompletions(filePrefix);
+                    if (!matches.isEmpty()) {
                         String prefix = "";
-                        if (list.size() > 1) {
-                            prefix = findPrefix(new ArrayList<>(list));
+                        if (matches.size() > 1) {
+                            prefix = findCommonPrefix(new ArrayList<>(matches));
                         }
                         if ((prefix.isEmpty() || filePrefix.equals(prefix))) {
-                            userBuilder.append(tabCompleteFile(filePrefix, list, userBuilder.toString()));
+                            inputBuilder.append(completeFileName(filePrefix, matches, inputBuilder.toString()));
                         } else {
-                            String i = prefix.substring(filePrefix.length());
-                            userBuilder.append(i);
-                            System.out.print(i);
+                            String completion = prefix.substring(filePrefix.length());
+                            inputBuilder.append(completion);
+                            System.out.print(completion);
                         }
                     } else {
                         System.out.print("\u0007");
                     }
                 }
-                else if (user == '\t') {
-                    String temp = BuiltinCommands.tabCompletionForBuiltin(userBuilder.toString());
-                    if (temp != null) {
-                        userBuilder.append(temp).append(' ');
-                        System.out.print(temp + ' ');
+                else if (inputCharacter == '\t') {
+                    String completion = BuiltInCommands.completeBuiltInCommand(inputBuilder.toString());
+                    if (completion != null) {
+                        inputBuilder.append(completion).append(' ');
+                        System.out.print(completion + ' ');
                     } else {
-                        Set<String> list = ExternalCommands.tabCompletionForExternal(userBuilder.toString());
+                        Set<String> matches = ExternalCommandRunner.findExternalCommandCompletions(inputBuilder.toString());
 
-                        if (!list.isEmpty()) {
+                        if (!matches.isEmpty()) {
                             String prefix = "";
-                            if (list.size() > 1) {
-                                prefix = findPrefix(new ArrayList<>(list));
-                                if(!prefix.isEmpty())
+                            if (matches.size() > 1) {
+                                prefix = findCommonPrefix(new ArrayList<>(matches));
+                                if (!prefix.isEmpty())
                                 {
-                                    if(userBuilder.toString().equals(prefix) && !isPreviousKeyTab)
+                                    if (inputBuilder.toString().equals(prefix) && !previousKeyWasTab)
                                     {
                                         System.out.print("\u0007");
-                                        isPreviousKeyTab=true;
+                                        previousKeyWasTab = true;
                                     }
                                 }
                             }
-                            if ((prefix.isEmpty() || userBuilder.toString().equals(prefix))) {
+                            if ((prefix.isEmpty() || inputBuilder.toString().equals(prefix))) {
 
-                                userBuilder.append(tabCompleteExternal(userBuilder, list));
+                                inputBuilder.append(completeExternalCommand(inputBuilder, matches));
                             } else {
-                                String i = prefix.substring(userBuilder.toString().length());
-                                userBuilder.append(i);
-                                System.out.print(i);
+                                String completionText = prefix.substring(inputBuilder.toString().length());
+                                inputBuilder.append(completionText);
+                                System.out.print(completionText);
+                                System.out.print("\u0007");
                             }
                         }
                     }
 
-                }  else {
-                    System.out.print("\u0007");
+                } else{
+                    System.out.print("");
                 }
             }
         }
 
-        return userBuilder.toString();
+        return inputBuilder.toString();
     }
     public static void run(BufferedReader reader) throws IOException  {
         String userInput="";
 
         while (true) {
             System.out.print("$ ");
-            userInput =  getuserInput(reader);
+            userInput = readUserInput(reader);
             if (userInput.isBlank()) {
                 continue;
             }
@@ -324,55 +325,55 @@ public class Shell {
             {
                 break;
             }
-            Information l = parsing(userInput);
-            List<String> userList = new ArrayList<>(l.usrList);
-            List<String> userArgument;
+            CommandInfo commandInfo = parseCommandLine(userInput);
+            List<String> commandArguments = new ArrayList<>(commandInfo.commandArguments);
+            List<String> commandArgumentValues;
 
-            String command = userList.getFirst();
-            if (l.missingFileName) {
+            String command = commandArguments.getFirst();
+            if (commandInfo.missingFileName) {
                 System.out.println("Expected a string, but found end of the input");
             } else {
-                if (BuiltinCommands.isThisBuiltin(command)) {
+                if (BuiltInCommands.isBuiltInCommand(command)) {
                     PrintStream originalOut = System.out;
                     PrintStream originalError = System.err;
-                    if (!l.outputFile.isBlank()) {
+                    if (!commandInfo.outputFile.isBlank()) {
                         try {
 
-                            System.setOut(createPrintStream(l.appendOutput,l.outputFile));
+                            System.setOut(createPrintStream(commandInfo.appendOutput, commandInfo.outputFile));
 
                         } catch (IOException e) {
                             System.setOut(originalOut);
-                            System.out.println(l.outputFile + ": no file or directory");
+                            System.out.println(commandInfo.outputFile + ": no file or directory");
                             continue;
                         }
                     }
-                    if(!l.errorFile.isBlank())
+                    if (!commandInfo.errorFile.isBlank())
                     {
 
                         try {
-                            System.setErr(createPrintStream(l.appendError, l.errorFile));
+                            System.setErr(createPrintStream(commandInfo.appendError, commandInfo.errorFile));
 
                         } catch (IOException e) {
                             System.setErr(originalError);
-                            System.out.println( l.errorFile + ": no file or directory");
+                            System.out.println(commandInfo.errorFile + ": no file or directory");
                         }
                     }
-                    userArgument = userList.subList(1,userList.toArray().length);
-                    BuiltinCommands.runCommands(command,userArgument);
+                    commandArgumentValues = commandArguments.subList(1, commandArguments.toArray().length);
+                    BuiltInCommands.executeBuiltInCommand(command, commandArgumentValues);
                     System.setOut(originalOut);
                     System.setErr(originalError);
                 }
                 else{
-                    ExternalCommands.runCommands(command,userList, l.outputFile, l.errorFile, l.appendOutput,l.appendError);
+                    ExternalCommandRunner.executeExternalCommand(command, commandArguments, commandInfo.outputFile, commandInfo.errorFile, commandInfo.appendOutput, commandInfo.appendError);
                 }
             }
         }
     }
-    public static PrintStream createPrintStream (boolean isAppendTrue, String fileName) throws IOException {
-        if (isAppendTrue) {
-            return new PrintStream(Files.newOutputStream(FilePath.getAbsolutePath(fileName), CREATE, StandardOpenOption.APPEND));
+    public static PrintStream createPrintStream(boolean appendOutput, String fileName) throws IOException {
+        if (appendOutput) {
+            return new PrintStream(Files.newOutputStream(PathUtils.resolveFromCurrentDirectory(fileName), CREATE, StandardOpenOption.APPEND));
         }
-        return new PrintStream(Files.newOutputStream(FilePath.getAbsolutePath(fileName)));
+        return new PrintStream(Files.newOutputStream(PathUtils.resolveFromCurrentDirectory(fileName)));
     }
 
 }
