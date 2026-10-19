@@ -35,7 +35,7 @@ public class LineReader {
 
     }
     private void handleTab(char inputCharacter) {
-        previousKeyWasTab = false;
+
         if (inputBuilder.isEmpty()) {
             //tab{if(userBuilder.isEmpty())
             inputBuilder.append(inputCharacter);
@@ -86,6 +86,7 @@ public class LineReader {
                 }
             }
         }
+        previousKeyWasTab = true;
     }
 
     public  String readUserInput(BufferedReader reader) throws IOException
@@ -130,26 +131,29 @@ public class LineReader {
                         if (inputBuilder.substring(inputBuilder.indexOf(" ")).equals(commonPrefix) && !previousKeyWasTab) {
 
                             System.out.print("\u0007");
-                            previousKeyWasTab = true;
                         }
                         fileOrDirectory =false;
                     }
                     else {
                         if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
                             System.out.print("\u0007");
-                            previousKeyWasTab = true;
+
+
                         }
                     }
                 }
             }
             if ((commonPrefix.isEmpty() || userPrefix.equals(commonPrefix))) { //commonPrefix is excatly one or there is no commonPrefix
 
-                inputBuilder.append(completeOrListMatches(userPrefix, matches));
-            } else {
+                    inputBuilder.append(completeOrListMatches(userPrefix, matches));
+            }
+            else {
                 String completionText = commonPrefix.substring(inputBuilder.toString().length()); //commonPrefix is longer than user
                 inputBuilder.append(completionText);
                 System.out.print(completionText);
             }
+
+
         }
         else{
             if (!previousKeyWasTab) { //no matches
@@ -169,19 +173,20 @@ public class LineReader {
                     completionSuffix = match.substring(prefix.length()) +' ';
                 }
                 System.out.print(completionSuffix);
-
             }
-        } else {
-            if(!previousKeyWasTab) {
-                System.err.print("2");
+        }
+        else {
+            if(previousKeyWasTab) {
                 System.out.println();
                 for (var match : matches) {
                     System.out.print(match + " ");
                 }
                 System.out.println();
                 System.out.print("$ " + inputBuilder);
+                previousKeyWasTab = false;
                 return "";
             }
+
         }
         return completionSuffix;
 
