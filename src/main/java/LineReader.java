@@ -35,6 +35,7 @@ public class LineReader {
 
     }
     private void handleTab(char inputCharacter) {
+        previousKeyWasTab = false;
         if (inputBuilder.isEmpty()) {
             //tab{if(userBuilder.isEmpty())
             inputBuilder.append(inputCharacter);
