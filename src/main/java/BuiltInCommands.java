@@ -51,6 +51,16 @@ public class BuiltInCommands {
             case "type" -> printCommandType(argumentText);
             case "pwd" -> printWorkingDirectory();
             case "cd" -> changeDirectory(argumentText);
+            case "complete"-> printCompletion(argumentText);
+        }
+    }
+    private static void printCompletion(String argumentText)
+    {
+        int lastIndex = argumentText.indexOf("p");
+        if(lastIndex!=-1)
+        {
+            String temp = argumentText.substring(lastIndex+1);
+            System.out.println("complete:"+temp+": no completion specification");
         }
     }
     private static void printEcho(String argumentText) {
