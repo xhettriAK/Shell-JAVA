@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BuiltInCommands {
 
-    public final static String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd"};
+    public final static String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete"};
 
     public static String completeBuiltInCommand(String commandPrefix)
     {

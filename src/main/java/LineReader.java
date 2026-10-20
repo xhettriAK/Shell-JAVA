@@ -118,7 +118,6 @@ public class LineReader {
                 }
             }
         }
-
         return inputBuilder.toString();
     }
     private void applyCompletionMatches(String userPrefix, Set<String>matches) {
