@@ -23,15 +23,23 @@ public class PathUtils {
         return "";
     }
     public static Set<String> findFileCompletions(String directory, String prefix)
-    {
+    {    boolean addBackslash = false;
         Set<String> matches = new TreeSet<>();
         Path currentDirectory = Path.of(BuiltInCommands.getCurrentDirectory()).resolve(Path.of(directory));
         try (Stream<Path> stream = Files.list(currentDirectory)) {
              List<Path> paths = stream.toList();
              for (Path candidate : paths) {
+                 if (Files.isDirectory(candidate)) {
+                     addBackslash = true;
+                 }
                  String fileName = candidate.getFileName().toString();
                  if (fileName.startsWith(prefix)) {
-                     matches.add(fileName);
+                     if (addBackslash) {
+                         matches.add(fileName + "/");
+                         addBackslash=false;
+                     } else {
+                         matches.add(fileName);
+                     }
                  }
              }
         } catch (IOException e) {

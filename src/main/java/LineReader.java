@@ -165,7 +165,7 @@ public class LineReader {
         if (matches.size() == 1) {
             for (var match : matches) {
                 if(isDirectory) {
-                    completionSuffix = match.substring(prefix.length()).stripTrailing() +'/';
+                    completionSuffix = match.substring(prefix.length()).stripTrailing();
                     isDirectory =false;
                 }else{
                     completionSuffix = match.substring(prefix.length()) +' ';
