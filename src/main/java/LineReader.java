@@ -128,7 +128,7 @@ public class LineReader {
                 if (!commonPrefix.isEmpty()) {
                     if(fileOrDirectory)
                     {
-                        if (inputBuilder.substring(inputBuilder.indexOf(" ")).equals(commonPrefix) && !previousKeyWasTab) {
+                        if (userPrefix.equals(commonPrefix) && !previousKeyWasTab) {
 
                             System.out.print("\u0007");
                         }
@@ -137,8 +137,6 @@ public class LineReader {
                     else {
                         if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
                             System.out.print("\u0007");
-
-
                         }
                     }
                 }
@@ -148,7 +146,7 @@ public class LineReader {
                     inputBuilder.append(completeOrListMatches(userPrefix, matches));
             }
             else {
-                String completionText = commonPrefix.substring(inputBuilder.toString().length()); //commonPrefix is longer than user
+                String completionText = commonPrefix.substring(userPrefix.length()); //commonPrefix is longer than user
                 inputBuilder.append(completionText);
                 System.out.print(completionText);
             }
