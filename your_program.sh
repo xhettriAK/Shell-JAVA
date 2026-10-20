@@ -22,4 +22,4 @@ set -e # Exit early if any commands fail
 # - Edit this to change how your program runs locally
 # - Edit .codecrafters/run.sh to change how your program runs remotely
 #exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 --enable-native-access=ALL-UNNAMED --enable-preview -jar /tmp/codecrafters-build-shell-java/codecrafters-shell.jar "$@"
-exec java --enable-native-access=ALL-UNNAMED   --enable-preview -jar /tmp/codecrafters-build-shell-java/codecrafters-shell.jar "$@".
+exec java --enable-native-access=ALL-UNNAMED   --enable-preview -jar /tmp/codecrafters-build-shell-java/codecrafters-shell.jar "$@"

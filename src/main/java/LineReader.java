@@ -34,6 +34,7 @@ public class LineReader {
         inputBuilder.append(inputCharacter);
 
     }
+
     private void handleTab(char inputCharacter) {
 
         if (inputBuilder.isEmpty()) {
@@ -53,7 +54,7 @@ public class LineReader {
                     } else if (lastSlash != -1) {
                         filePrefix = prefix.substring(lastSlash + 1);
                         if (!filePrefix.isEmpty()) {
-                            directory = prefix.substring(0, prefix.lastIndexOf(filePrefix));
+                            directory = prefix.substring(0, prefix.lastIndexOf(filePrefix)).trim();
                         }
 
                     } else{

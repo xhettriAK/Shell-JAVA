@@ -36,11 +36,11 @@ public class PathUtils {
                  if (fileName.startsWith(prefix)) {
                      if (addBackslash) {
                          matches.add(fileName + "/");
-                         addBackslash=false;
                      } else {
                          matches.add(fileName);
                      }
                  }
+                 addBackslash=false;
              }
         } catch (IOException e) {
                     System.out.print("");//skipping unreadable directories;
