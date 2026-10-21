@@ -58,7 +58,7 @@ public class LineReader {
     }
     public  void applyCompletionMatcherComplete(String output, String userValue)
     {
-        if (output.equals(userValue)) {
+        if (output.equals(userValue)& !previousKeyWasTab) {
 
             System.out.print("\u0007");
         }
