@@ -9,7 +9,7 @@ public class Main {
            CommandShell.run(reader);
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.getCause();
         }
 
     }

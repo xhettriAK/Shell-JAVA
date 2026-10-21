@@ -84,7 +84,7 @@ public class ExternalCommandRunner {
         } catch (IOException | InterruptedException e) {
             System.err.println(e.getMessage());
         }
-            return output.toString();
+            return output.toString().strip();
     }
     public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
         if (!isCommandAvailable(command)) {
