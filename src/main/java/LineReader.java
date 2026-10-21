@@ -38,8 +38,8 @@ public class LineReader {
     {
         String argv1,argv2="", argv3="";
         argv1 = userInput.substring(0,userInput.indexOf(" "));
-        if(userInput.toString().strip().length()>1) {
-            String[] argvs = userInput.toString().split(" ");
+        String[] argvs = userInput.toString().split(" ");
+        if(argvs.length>1) {
             for(int i = 0; i< argvs.length; i++)
             {
                 if(i  == argvs.length - 1)
