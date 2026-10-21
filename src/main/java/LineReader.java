@@ -184,9 +184,8 @@ public class LineReader {
 
         }
         else{
-            if (!previousKeyWasTab) { //no matches
+             //no matches
                 System.out.print("\u0007");
-            }
         }
     }
     private  String completeOrListMatches(String prefix, Set<String> matches)
