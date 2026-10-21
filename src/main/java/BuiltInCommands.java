@@ -155,6 +155,20 @@ public class BuiltInCommands {
 
         ExternalCommandRunner.executeCompletorCommand(completorList.get(argv1),argv1, argv2,argv3);
     }
+    public static   void applyCompletionMatcherComplete(String output, String userValue)
+    {
+        if (output.equals(userValue)) {
+
+            System.out.print("\u0007");
+        }
+        else {
+            String completionText = output.substring(userValue.length()); //commonPrefix is longer than user
+            LineReader.setinputBuilder(completionText);
+            System.out.print(completionText+ " ");
+        }
+
+    }
+
     private static void printEcho(String argumentText) {
 
             System.out.println(argumentText);

@@ -9,10 +9,13 @@ import java.util.Set;
 
 public class LineReader {
     private  boolean previousKeyWasTab = false;
-    private  StringBuilder inputBuilder = new StringBuilder();
+    private static StringBuilder inputBuilder = new StringBuilder();
     private boolean isDirectory = false;
     private boolean fileOrDirectory = false;
-
+    public static void setinputBuilder(String completion)
+    {
+        inputBuilder.append(completion);
+    }
     private  void  handleBackSpace()
     {
         if (!inputBuilder.isEmpty()) {
@@ -127,6 +130,7 @@ public class LineReader {
         }
         return inputBuilder.toString();
     }
+
     private void applyCompletionMatches(String userPrefix, Set<String>matches) {
         if (!matches.isEmpty()) {
             String commonPrefix = "";
