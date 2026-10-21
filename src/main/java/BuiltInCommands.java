@@ -132,16 +132,9 @@ public class BuiltInCommands {
     }
 
     public static  boolean commandExistInCompleter(String userInput) {
-        String temp = userInput.strip();
-        String command;
-        String[] argv = new String[6];
-        if(temp.length()>1)
-        {
-
-        }
-        return completorList.get(userInput.strip()) != null;
+        return completorList.get(userInput.strip())!=null;
     }
-    public static void excuteCompletorCommand(StringBuilder userInput)
+    public static void executeCompletorCommand(StringBuilder userInput)
     {
         String argv1,argv2="", argv3="";
         argv1 = userInput.substring(0,userInput.indexOf(" "));
@@ -149,12 +142,11 @@ public class BuiltInCommands {
            String[] argvs = userInput.toString().split(" ");
            for(int i = 0; i< argvs.length; i++)
            {
-              if(i + 1 == argvs.length - 1)
+              if(i  == argvs.length - 1)
               {
-                  argv2 = argvs[i+1];
-                  argv3 = argvs[i];
+                  argv2 = argvs[i];
+                  argv3 = argvs[i-1];
               }
-
            }
         }
         else{

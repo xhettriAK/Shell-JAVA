@@ -6,7 +6,6 @@ import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.DoubleToIntFunction;
 
 public class LineReader {
     private  boolean previousKeyWasTab = false;
@@ -48,7 +47,7 @@ public class LineReader {
                 if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())||
                         BuiltInCommands.commandExistInCompleter(command)) {
 
-                    BuiltInCommands.excuteCompletorCommand(inputBuilder);
+                    BuiltInCommands.executeCompletorCommand(inputBuilder);
                 }
                 else {
                     fileOrDirectory = true;
