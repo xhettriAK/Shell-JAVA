@@ -1,10 +1,7 @@
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ExternalCommandRunner {
@@ -69,20 +66,20 @@ public class ExternalCommandRunner {
 
         return !PathUtils.findExecutable(command).isEmpty();
     }
-    public static String executeCompletorCommand(StringBuilder input, String path, String argv1, String argv2, String argv3)  {
+    public static Set<String> executeCompletorCommand(StringBuilder input, String path, String argv1, String argv2, String argv3)  {
 
         ProcessBuilder processBuilder = new ProcessBuilder(path,argv1, argv2,argv3);
          Map<String,String> env = processBuilder.environment();
          env.put("COMP_LINE", input.toString());
          env.put("COMP_POINT",String.valueOf(input.length()));
 
-        StringBuilder output= new StringBuilder();
+        Set<String>output = new TreeSet<>();
         try {
             Process process = processBuilder.start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while( (line=reader.readLine())!=null) {
-                    output.append(line);
+                    output.add(line);
                 }
             }
             process.waitFor();
@@ -90,7 +87,7 @@ public class ExternalCommandRunner {
         } catch (IOException | InterruptedException e) {
             System.err.println(e.getMessage());
         }
-            return output.toString().strip();
+            return output;
     }
     public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
         if (!isCommandAvailable(command)) {

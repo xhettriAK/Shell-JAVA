@@ -54,25 +54,10 @@ public class LineReader {
             argv3 =argv1;
         }
 
-        String output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,BuiltInCommands.getvalueFromList(argv1),argv1, argv2,argv3);
-        applyCompletionMatcherComplete(output,argv2);
+        Set<String> output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,BuiltInCommands.getvalueFromList(argv1),argv1, argv2,argv3);
+        applyCompletionMatches(argv2,output);
     }
-    public  void applyCompletionMatcherComplete(String output, String userValue)
-    {
-        if(!output.isEmpty()) {
-            if (output.equals(userValue) & !previousKeyWasTab) {
 
-                System.out.print("\u0007");
-            } else {
-                String completionText = output.substring(userValue.length()); //commonPrefix is longer than user
-                inputBuilder.append(completionText);
-                System.out.print(completionText + " ");
-            }
-        }else{
-            System.out.print("\u0007");
-        }
-
-    }
     private void handleTab(char inputCharacter) {
 
         if (inputBuilder.isEmpty()) {
