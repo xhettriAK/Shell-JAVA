@@ -81,10 +81,6 @@ public class LineReader {
         } else {
             if (inputBuilder.toString().contains(" ")) {
                 String command = "";
-                Path Comp_Line = Path.of(inputBuilder.toString());
-                Path Comp_Point = Path.of(String.valueOf(inputBuilder.length()));
-                System.setProperties((Properties) Comp_Line);
-                System.setProperties((Properties) Comp_Point);
                 command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
                 if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())||
                         BuiltInCommands.commandExistInCompleter(command)) {
