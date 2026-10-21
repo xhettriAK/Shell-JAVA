@@ -130,6 +130,7 @@ public class Complete  implements BuiltInCommands{
 
     }
     public static String getvalueFromList(String argv1) {
+
          return completorList.get(argv1);
     }
 }

@@ -53,10 +53,12 @@ public class LineReader {
                 command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
                 if(Complete.commandExistInCompleter(inputBuilder.toString())||
                         Complete.commandExistInCompleter(command)) {
+
                     ArrayList<String> arg = Complete.executeCompletorCommand(inputBuilder);
                     Set<String>output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,
                             Complete.getvalueFromList(arg.getFirst()), arg.getFirst(),arg.get(1),arg.getLast());
-                    applyCompletionMatches(arg.get(2),output);
+
+                    applyCompletionMatches(arg.get(1),output);
                 }
                 else {
                     fileOrDirectory = true;
@@ -152,7 +154,11 @@ public class LineReader {
                         fileOrDirectory =false;
                     }
                     else {
-                        if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
+                        if(userPrefix.equals(commonPrefix)&&!previousKeyWasTab)
+                        {
+                            System.out.print("\u0007");
+                        }
+                        else if (inputBuilder.toString().equals(commonPrefix) && !previousKeyWasTab) {
                             System.out.print("\u0007");
                         }
                     }
@@ -200,9 +206,7 @@ public class LineReader {
                 previousKeyWasTab = false;
                 return "";
             }
-            else{
-                System.out.print("\u0007");
-            }
+
 
         }
         return completionSuffix;
