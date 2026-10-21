@@ -6,6 +6,7 @@ import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.DoubleToIntFunction;
 
 public class LineReader {
     private  boolean previousKeyWasTab = false;
@@ -42,9 +43,14 @@ public class LineReader {
             inputBuilder.append(inputCharacter);
         } else {
             if (inputBuilder.toString().contains(" ")) {
-                if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())) {
-                    BuiltInCommands.excuteCompletorCommand(inputBuilder.toString());
-                }else {
+                String command = "";
+                command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
+                if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())||
+                        BuiltInCommands.commandExistInCompleter(command)) {
+
+                    BuiltInCommands.excuteCompletorCommand(inputBuilder);
+                }
+                else {
                     fileOrDirectory = true;
                     String prefix = inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
                     String directory = "";

@@ -68,8 +68,8 @@ public class ExternalCommandRunner {
 
         return !PathUtils.findExecutable(command).isEmpty();
     }
-    public static void executeCompletorCommand(String command)  {
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
+    public static void executeCompletorCommand(String argv1,String argv2, String argv3)  {
+        ProcessBuilder processBuilder = new ProcessBuilder(argv1,argv2,argv3);
         String output="";
         try {
             Process process = processBuilder.start();
