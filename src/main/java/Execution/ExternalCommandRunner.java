@@ -67,7 +67,7 @@ public class ExternalCommandRunner {
          if(runInBackground) {
              jobs++;
              long pid = process.pid();
-             System.out.println(jobs+" "+ pid);
+             System.out.println("["+jobs+"]"+" "+ pid);
          }
          else{
              process.waitFor();
