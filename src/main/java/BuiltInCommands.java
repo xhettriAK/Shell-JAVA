@@ -5,7 +5,7 @@ import java.util.*;
 public class BuiltInCommands {
 
     public final static String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete"};
-    private static  HashMap<String, String> list = new HashMap<>();
+    private static  HashMap<String, String> completorList = new HashMap<>();
 
     private static String currentDirectory = Path.of("").toAbsolutePath().toString();
 
@@ -97,30 +97,30 @@ public class BuiltInCommands {
             if (flag.get(pMask) && flag.get(cMask)) {
                 System.out.println("complete cant have both commands");
             } else if (flag.get(pMask)) {
-                if (list.isEmpty() && command.isEmpty()) {
+                if (completorList.isEmpty() && command.isEmpty()) {
                     System.out.println();
                 }
                 else{
-                    if(!command.isEmpty() && list.get(command)!=null)
+                    if(!command.isEmpty() && completorList.get(command)!=null)
                     {
-                        System.out.println("complete -C '"+list.get(command)+"' " + command);
+                        System.out.println("complete -C '"+ completorList.get(command)+"' " + command);
 
                     }
-                    else if(!command.isEmpty() && list.get(command)==null)
+                    else if(!command.isEmpty() && completorList.get(command)==null)
                     {
                         System.out.println("complete: "+ command+": no completion specification");
                     }
                     else{
-                        for(String key: list.keySet())
+                        for(String key: completorList.keySet())
                         {
-                            System.out.println("complete -C '"+list.get(key)+"' " + key);
+                            System.out.println("complete -C '"+ completorList.get(key)+"' " + key);
                         }
                     }
                 }
 
             }else if(flag.get(cMask))
             {
-                list.put(command, Value);
+                completorList.put(command, Value);
             }
             else{
                 System.out.println();
@@ -131,8 +131,14 @@ public class BuiltInCommands {
         flag.set(pMask,false);
     }
 
-
-
+    public static  boolean commandExistInCompleter(String userInput) {
+        return completorList.get(userInput.strip()) != null;
+    }
+    public static void excuteCompletorCommand(String userInput)
+    {
+        String file = completorList.get(userInput.strip());
+        ExternalCommandRunner.executeCompletorCommand(file);
+    }
     private static void printEcho(String argumentText) {
 
             System.out.println(argumentText);

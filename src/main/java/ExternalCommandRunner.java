@@ -68,6 +68,23 @@ public class ExternalCommandRunner {
 
         return !PathUtils.findExecutable(command).isEmpty();
     }
+    public static void executeCompletorCommand(String command)  {
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        String output="";
+        try {
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                while((output = reader.readLine())!=null) {
+                    System.out.print(output+" ");
+                }
+            }
+            process.waitFor();
+
+        } catch (IOException | InterruptedException e) {
+            System.err.println(e.getMessage());
+        }
+
+    }
     public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
         if (!isCommandAvailable(command)) {
             System.err.println(command + ": command not found");

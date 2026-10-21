@@ -42,39 +42,41 @@ public class LineReader {
             inputBuilder.append(inputCharacter);
         } else {
             if (inputBuilder.toString().contains(" ")) {
-                fileOrDirectory = true;
-                String prefix =inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
-                String directory = "";
-                String filePrefix = "";
-                int lastSlash = prefix.lastIndexOf('/');
-                if(prefix.contains("/")){
-                    if (lastSlash == prefix.length() - 1) {
-                        filePrefix = "";
-                        directory = prefix;
-                    } else if (lastSlash != -1) {
-                        filePrefix = prefix.substring(lastSlash + 1);
-                        if (!filePrefix.isEmpty()) {
-                            directory = prefix.substring(0, prefix.lastIndexOf(filePrefix)).trim();
+                if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())) {
+                    BuiltInCommands.excuteCompletorCommand(inputBuilder.toString());
+                }else {
+                    fileOrDirectory = true;
+                    String prefix = inputBuilder.substring(inputBuilder.lastIndexOf(" ") + 1);
+                    String directory = "";
+                    String filePrefix = "";
+                    int lastSlash = prefix.lastIndexOf('/');
+                    if (prefix.contains("/")) {
+                        if (lastSlash == prefix.length() - 1) {
+                            filePrefix = "";
+                            directory = prefix;
+                        } else if (lastSlash != -1) {
+                            filePrefix = prefix.substring(lastSlash + 1);
+                            if (!filePrefix.isEmpty()) {
+                                directory = prefix.substring(0, prefix.lastIndexOf(filePrefix)).trim();
+                            }
+
+                        } else {
+                            filePrefix = prefix;
+                            directory = prefix;
                         }
-
-                    } else{
+                    } else {
                         filePrefix = prefix;
-                        directory = prefix;
                     }
-                }
-                else{
-                    filePrefix = prefix;
-                }
 
-                Set<String> matches = PathUtils.findFileCompletions(directory,filePrefix);
-                if(matches.size()==1)
-                {
-                    if(Files.isDirectory(Path.of(directory + matches.iterator().next())))
-                    {
-                        isDirectory = true;
+
+                    Set<String> matches = PathUtils.findFileCompletions(directory, filePrefix);
+                    if (matches.size() == 1) {
+                        if (Files.isDirectory(Path.of(directory + matches.iterator().next()))) {
+                            isDirectory = true;
+                        }
                     }
+                    applyCompletionMatches(filePrefix, matches);
                 }
-                applyCompletionMatches(filePrefix,matches);
 
             } else {
                 String completion = BuiltInCommands.completeBuiltInCommand(inputBuilder.toString());
