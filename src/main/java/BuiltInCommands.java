@@ -1,10 +1,13 @@
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.*;
 
 public class BuiltInCommands {
 
     public final static String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete"};
+    private static  HashMap<String, String> list = new HashMap<>();
+
+    private static String currentDirectory = Path.of("").toAbsolutePath().toString();
 
     public static String completeBuiltInCommand(String commandPrefix)
     {
@@ -17,8 +20,6 @@ public class BuiltInCommands {
         }
         return null;
     }
-    private static String currentDirectory = Path.of("").toAbsolutePath().toString();
-
     public static String getCurrentDirectory()
     {
         return currentDirectory;
@@ -54,15 +55,80 @@ public class BuiltInCommands {
             case "complete"-> printCompletion(argumentText);
         }
     }
-    private static void printCompletion(String argumentText)
-    {
-        int lastIndex = argumentText.indexOf("p");
-        if(lastIndex!=-1)
+    private static void printCompletion(String argumentText) {
+        String[] CompletionFunction = {"-p", "-c"};
+        String[] CompletionArguments = argumentText.trim().split(" ");
+        String Value ="";
+
+        StringBuilder commandBuilder = new StringBuilder();
+        boolean doRest = true;
+        int pMask = 1;
+        int cMask = 2;
+        BitSet flag = new BitSet(8);
+        for(int i = 0; i<CompletionArguments.length; i++)
         {
-            String temp = argumentText.substring(lastIndex+1);
-            System.out.println("complete:"+temp+": no completion specification");
+            if(CompletionArguments[i].equals(CompletionFunction[0]))
+            {
+                flag.set(pMask,true);
+            }
+            else if(CompletionArguments[i].equals(CompletionFunction[1]))
+            {
+                flag.set(cMask,true);
+                if(i+1<CompletionArguments.length && !CompletionArguments[i+1].equals(" "))
+                {
+                    Value = CompletionArguments[i+1].trim();
+                    i++;
+                }
+                else{
+                    System.out.println("-C requires path as argument");
+                    doRest = false;
+                    break;
+                }
+            }
+            else
+            {
+                commandBuilder.append(CompletionArguments[i]);
+            }
         }
+        String command = commandBuilder.toString();
+
+        if(doRest) {
+
+            if (flag.get(pMask) && flag.get(cMask)) {
+                System.out.println("complete cant have both commands");
+            } else if (flag.get(pMask)) {
+                if (list.isEmpty()) {
+                    System.out.println();
+                }
+                else{
+                    if(!command.isEmpty())
+                    {
+                        System.out.println("complete -C '"+list.get(command)+"'" + command);
+
+                    }
+                    else{
+                        for(String key: list.keySet())
+                        {
+                            System.out.println("complete -C '"+list.get(key)+"' " + key);
+                        }
+                    }
+                }
+
+            }else if(flag.get(cMask))
+            {
+                list.put(command, Value);
+            }
+            else{
+                System.out.println();
+            }
+
+        }
+        flag.set(cMask,false);
+        flag.set(pMask,false);
     }
+
+
+
     private static void printEcho(String argumentText) {
 
             System.out.println(argumentText);
