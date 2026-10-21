@@ -22,10 +22,8 @@ public class LineReader {
     private  void  handleBackSpace()
     {
         if (!inputBuilder.isEmpty()) {
-
             inputBuilder.deleteCharAt(inputBuilder.length() - 1);
             System.out.print("\b \b");
-
         }
         previousKeyWasTab = false;
     }
@@ -51,10 +49,12 @@ public class LineReader {
             if (inputBuilder.toString().contains(" ")) {
                 String command = "";
                 command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
+
                 if(Complete.commandExistInCompleter(inputBuilder.toString())||
                         Complete.commandExistInCompleter(command)) {
 
                     ArrayList<String> arg = Complete.executeCompletorCommand(inputBuilder);
+
                     Set<String>output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,
                             Complete.getvalueFromList(arg.getFirst()), arg.getFirst(),arg.get(1),arg.getLast());
 
@@ -66,6 +66,7 @@ public class LineReader {
                     String directory = "";
                     String filePrefix = "";
                     int lastSlash = prefix.lastIndexOf('/');
+
                     if (prefix.contains("/")) {
                         if (lastSlash == prefix.length() - 1) {
                             filePrefix = "";
@@ -83,19 +84,19 @@ public class LineReader {
                     } else {
                         filePrefix = prefix;
                     }
-
-
                     Set<String> matches = PathUtils.findFileCompletions(directory, filePrefix);
                     if (matches.size() == 1) {
                         if (Files.isDirectory(Path.of(directory + matches.iterator().next()))) {
                             isDirectory = true;
                         }
                     }
+
                     applyCompletionMatches(filePrefix, matches);
                 }
 
             } else {
                 String completion = BuiltInCommands.completeBuiltInCommand(inputBuilder.toString());
+
                 if (completion != null) {
                     inputBuilder.append(completion).append(' ');
                     System.out.print(completion + ' ');
@@ -205,6 +206,9 @@ public class LineReader {
                 System.out.print("$ " + inputBuilder);
                 previousKeyWasTab = false;
                 return "";
+            }
+            else{
+                System.out.print("\u0007");
             }
 
 
