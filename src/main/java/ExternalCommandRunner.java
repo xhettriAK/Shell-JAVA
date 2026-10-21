@@ -73,8 +73,8 @@ public class ExternalCommandRunner {
 
         ProcessBuilder processBuilder = new ProcessBuilder(path,argv1, argv2,argv3);
          Map<String,String> env = processBuilder.environment();
-         env.put("Comp_Line", input.toString());
-         env.put("Comp_Point",String.valueOf(input.length()));
+         env.put("COMP_LINE", input.toString());
+         env.put("COMP_POINT",String.valueOf(input.length()));
 
         StringBuilder output= new StringBuilder();
         try {
