@@ -7,6 +7,10 @@ public class BuiltInCommands {
     public final static String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete"};
     private static  HashMap<String, String> completorList = new HashMap<>();
 
+    public static String getvalueFromList(String key)
+    {
+        return completorList.get(key);
+    }
     private static String currentDirectory = Path.of("").toAbsolutePath().toString();
 
     public static String completeBuiltInCommand(String commandPrefix)
@@ -134,40 +138,7 @@ public class BuiltInCommands {
     public static  boolean commandExistInCompleter(String userInput) {
         return completorList.get(userInput.strip())!=null;
     }
-    public static void executeCompletorCommand(StringBuilder userInput)
-    {
-        String argv1,argv2="", argv3="";
-        argv1 = userInput.substring(0,userInput.indexOf(" "));
-        if(userInput.toString().strip().length()>1) {
-           String[] argvs = userInput.toString().split(" ");
-           for(int i = 0; i< argvs.length; i++)
-           {
-              if(i  == argvs.length - 1)
-              {
-                  argv2 = argvs[i];
-                  argv3 = argvs[i-1];
-              }
-           }
-        }
-        else{
-            argv3 =argv1;
-        }
 
-        ExternalCommandRunner.executeCompletorCommand(completorList.get(argv1),argv1, argv2,argv3);
-    }
-    public static   void applyCompletionMatcherComplete(String output, String userValue)
-    {
-        if (output.equals(userValue)) {
-
-            System.out.print("\u0007");
-        }
-        else {
-            String completionText = output.substring(userValue.length()); //commonPrefix is longer than user
-            LineReader.setinputBuilder(completionText);
-            System.out.print(completionText+ " ");
-        }
-
-    }
 
     private static void printEcho(String argumentText) {
 

@@ -68,7 +68,7 @@ public class ExternalCommandRunner {
 
         return !PathUtils.findExecutable(command).isEmpty();
     }
-    public static void executeCompletorCommand(String path, String argv1, String argv2, String argv3)  {
+    public static String executeCompletorCommand(String path, String argv1, String argv2, String argv3)  {
         ProcessBuilder processBuilder = new ProcessBuilder(path,argv1, argv2,argv3);
         StringBuilder output= new StringBuilder();
         try {
@@ -84,7 +84,7 @@ public class ExternalCommandRunner {
         } catch (IOException | InterruptedException e) {
             System.err.println(e.getMessage());
         }
-        BuiltInCommands.applyCompletionMatcherComplete(output.toString(),argv2);
+            return output.toString();
     }
     public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
         if (!isCommandAvailable(command)) {

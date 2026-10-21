@@ -9,13 +9,10 @@ import java.util.Set;
 
 public class LineReader {
     private  boolean previousKeyWasTab = false;
-    private static StringBuilder inputBuilder = new StringBuilder();
+    private  StringBuilder inputBuilder = new StringBuilder();
     private boolean isDirectory = false;
     private boolean fileOrDirectory = false;
-    public static void setinputBuilder(String completion)
-    {
-        inputBuilder.append(completion);
-    }
+
     private  void  handleBackSpace()
     {
         if (!inputBuilder.isEmpty()) {
@@ -37,7 +34,41 @@ public class LineReader {
         inputBuilder.append(inputCharacter);
 
     }
+    private  void executeCompletorCommand(StringBuilder userInput)
+    {
+        String argv1,argv2="", argv3="";
+        argv1 = userInput.substring(0,userInput.indexOf(" "));
+        if(userInput.toString().strip().length()>1) {
+            String[] argvs = userInput.toString().split(" ");
+            for(int i = 0; i< argvs.length; i++)
+            {
+                if(i  == argvs.length - 1)
+                {
+                    argv2 = argvs[i];
+                    argv3 = argvs[i-1];
+                }
+            }
+        }
+        else{
+            argv3 =argv1;
+        }
 
+        String output = ExternalCommandRunner.executeCompletorCommand(BuiltInCommands.getvalueFromList(argv1),argv1, argv2,argv3);
+        applyCompletionMatcherComplete(output,argv2);
+    }
+    public  void applyCompletionMatcherComplete(String output, String userValue)
+    {
+        if (output.equals(userValue)) {
+
+            System.out.print("\u0007");
+        }
+        else {
+            String completionText = output.substring(userValue.length()); //commonPrefix is longer than user
+            inputBuilder.append(completionText);
+            System.out.print(completionText+ " ");
+        }
+
+    }
     private void handleTab(char inputCharacter) {
 
         if (inputBuilder.isEmpty()) {
@@ -49,8 +80,7 @@ public class LineReader {
                 command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
                 if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())||
                         BuiltInCommands.commandExistInCompleter(command)) {
-
-                    BuiltInCommands.executeCompletorCommand(inputBuilder);
+                    executeCompletorCommand(inputBuilder);
                 }
                 else {
                     fileOrDirectory = true;
