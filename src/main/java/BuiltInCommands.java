@@ -60,7 +60,7 @@ public class BuiltInCommands {
         }
     }
     private static void printCompletion(String argumentText) {
-        String[] CompletionFunction = {"-p", "-C"};
+        String[] CompletionFunction = {"-p", "-C","-r"};
         String[] CompletionArguments = argumentText.trim().split(" ");
         String Value ="";
 
@@ -68,6 +68,7 @@ public class BuiltInCommands {
         boolean doRest = true;
         int pMask = 1;
         int cMask = 2;
+        int rMask = 3;
         BitSet flag = new BitSet(8);
         for(int i = 0; i<CompletionArguments.length; i++)
         {
@@ -89,6 +90,9 @@ public class BuiltInCommands {
                     break;
                 }
             }
+            else if(CompletionArguments[i].equals(CompletionFunction[2])){
+                flag.set(rMask,true);
+            }
             else
             {
                 commandBuilder.append(CompletionArguments[i]);
@@ -98,11 +102,11 @@ public class BuiltInCommands {
 
         if(doRest) {
 
-            if (flag.get(pMask) && flag.get(cMask)) {
-                System.out.println("complete cant have both commands");
+            if (flag.cardinality()>1) {
+                System.out.println("complete cant have multiple commands");
             } else if (flag.get(pMask)) {
                 if (completorList.isEmpty() && command.isEmpty()) {
-                    System.out.println();
+                    System.out.print("");
                 }
                 else{
                     if(!command.isEmpty() && completorList.get(command)!=null)
@@ -126,13 +130,29 @@ public class BuiltInCommands {
             {
                 completorList.put(command, Value);
             }
-            else{
-                System.out.println();
-            }
+            else if(flag.get(rMask)) {
+                if (completorList.isEmpty() && command.isEmpty()) {
+                    System.out.print("");
+                } else {
+                    if (!command.isEmpty() && completorList.get(command) != null) {
+                        completorList.remove(command);
 
+                    } else if (!command.isEmpty() && completorList.get(command) == null) {
+                        System.out.println("complete: " + command + ": no completion specification");
+                    } else {
+                        for (String key : completorList.keySet()) {
+                            completorList.remove(key);
+                        }
+                    }
+
+                }
+            }
+        } else{
+            System.out.println();
         }
         flag.set(cMask,false);
         flag.set(pMask,false);
+        flag.set(rMask,false);
     }
 
     public static  boolean commandExistInCompleter(String userInput) {
