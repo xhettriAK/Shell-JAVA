@@ -1,3 +1,5 @@
+package Execution;
+import Builtins.WorkingDirectory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +27,7 @@ public class PathUtils {
     public static Set<String> findFileCompletions(String directory, String prefix)
     {    boolean addBackslash = false;
         Set<String> matches = new TreeSet<>();
-        Path currentDirectory = Path.of(BuiltInCommands.getCurrentDirectory()).resolve(Path.of(directory));
+        Path currentDirectory = Path.of(WorkingDirectory.getCurrentDirectory()).resolve(Path.of(directory));
         try (Stream<Path> stream = Files.list(currentDirectory)) {
              List<Path> paths = stream.toList();
              for (Path candidate : paths) {
@@ -52,7 +54,7 @@ public class PathUtils {
 
     public static Path resolveFromCurrentDirectory(String fileName) {
 
-        Path currentDirectory = Path.of(BuiltInCommands.getCurrentDirectory());
+        Path currentDirectory = Path.of(WorkingDirectory.getCurrentDirectory());
 
         return currentDirectory.resolve(fileName);
     }

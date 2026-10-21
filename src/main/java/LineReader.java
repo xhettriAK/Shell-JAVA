@@ -1,3 +1,7 @@
+import Builtins.BuiltInCommands;
+import Builtins.Complete;
+import Execution.ExternalCommandRunner;
+import Execution.PathUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -5,8 +9,9 @@ import java.nio.file.Path;
 import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
+
+import static Execution.ExternalCommandRunner.executeCompletorCommand;
 
 public class LineReader {
     private  boolean previousKeyWasTab = false;
@@ -35,28 +40,7 @@ public class LineReader {
         inputBuilder.append(inputCharacter);
 
     }
-    private  void executeCompletorCommand(StringBuilder userInput)
-    {
-        String argv1,argv2="", argv3="";
-        argv1 = userInput.substring(0,userInput.indexOf(" "));
-        String[] argvs = userInput.toString().split(" ");
-        if(argvs.length>1) {
-            for(int i = 0; i< argvs.length; i++)
-            {
-                if(i  == argvs.length - 1)
-                {
-                    argv2 = argvs[i];
-                    argv3 = argvs[i-1];
-                }
-            }
-        }
-        else{
-            argv3 =argv1;
-        }
 
-        Set<String> output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,BuiltInCommands.getvalueFromList(argv1),argv1, argv2,argv3);
-        applyCompletionMatches(argv2,output);
-    }
 
     private void handleTab(char inputCharacter) {
 
@@ -67,9 +51,12 @@ public class LineReader {
             if (inputBuilder.toString().contains(" ")) {
                 String command = "";
                 command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
-                if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())||
-                        BuiltInCommands.commandExistInCompleter(command)) {
-                    executeCompletorCommand(inputBuilder);
+                if(Complete.commandExistInCompleter(inputBuilder.toString())||
+                        Complete.commandExistInCompleter(command)) {
+                    ArrayList<String> arg = Complete.executeCompletorCommand(inputBuilder);
+                    Set<String>output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,
+                            Complete.getvalueFromList(arg.getFirst()), arg.getFirst(),arg.get(1),arg.getLast());
+                    applyCompletionMatches(arg.get(2),output);
                 }
                 else {
                     fileOrDirectory = true;

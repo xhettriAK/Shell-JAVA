@@ -1,65 +1,12 @@
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
+package Builtins;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
 
-public class BuiltInCommands {
+public class Complete  implements BuiltInCommands{
+    private static HashMap<String, String> completorList = new HashMap<>();
 
-    public final static String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete"};
-    private static  HashMap<String, String> completorList = new HashMap<>();
-
-    public static String getvalueFromList(String key)
-    {
-        return completorList.get(key);
-    }
-    private static String currentDirectory = Path.of("").toAbsolutePath().toString();
-
-    public static String completeBuiltInCommand(String commandPrefix)
-    {
-        for (var command : BUILT_IN_COMMANDS)
-        {
-            if (command.startsWith(commandPrefix))
-            {
-                return command.substring(commandPrefix.length());
-            }
-        }
-        return null;
-    }
-    public static String getCurrentDirectory()
-    {
-        return currentDirectory;
-
-    }
-    public static boolean isBuiltInCommand(String command)
-    {
-        for (var builtInCommand : BUILT_IN_COMMANDS) {
-            if (command.equals(builtInCommand)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    static void executeBuiltInCommand(String command, List<String> arguments)
-    {
-        StringBuilder argumentsBuilder = new StringBuilder();
-        for (var argument : arguments)
-        {
-            if (!arguments.getLast().equals(argument)) {
-                argumentsBuilder.append(argument).append(" ");
-            }
-            else {
-                argumentsBuilder.append(argument);
-            }
-        }
-        String argumentText = argumentsBuilder.toString();
-        switch (command) {
-            case "echo" -> printEcho(argumentText);
-            case "type" -> printCommandType(argumentText);
-            case "pwd" -> printWorkingDirectory();
-            case "cd" -> changeDirectory(argumentText);
-            case "complete"-> printCompletion(argumentText);
-        }
-    }
-    private static void printCompletion(String argumentText) {
+     static void printCompletion(String argumentText) {
         String[] CompletionFunction = {"-p", "-C","-r"};
         String[] CompletionArguments = argumentText.trim().split(" ");
         String Value ="";
@@ -154,59 +101,35 @@ public class BuiltInCommands {
         flag.set(pMask,false);
         flag.set(rMask,false);
     }
-
     public static  boolean commandExistInCompleter(String userInput) {
         return completorList.get(userInput.strip())!=null;
     }
-
-
-    private static void printEcho(String argumentText) {
-
-            System.out.println(argumentText);
-    }
-
-
-    private static void printWorkingDirectory() {
-        System.out.println(currentDirectory);
-
-
-    }
-    private static void printCommandType(String commandName)
+    public static ArrayList<String> executeCompletorCommand(StringBuilder userInput)
     {
-        if (isBuiltInCommand(commandName)) {
-            System.out.println(commandName + " is a shell builtin");
-        } else {
-            PathUtils.printExecutablePath(commandName);
+        String argv1,argv2="", argv3="";
+        argv1 = userInput.substring(0,userInput.indexOf(" "));
+        String[] argvs = userInput.toString().split(" ");
+        if(argvs.length>1) {
+            for(int i = 0; i< argvs.length; i++)
+            {
+                if(i  == argvs.length - 1)
+                {
+                    argv2 = argvs[i];
+                    argv3 = argvs[i-1];
+                }
+            }
         }
+        else{
+            argv3 =argv1;
+        }
+        ArrayList<String>arg = new ArrayList<>();
+        arg.add(argv1);
+        arg.add(argv2);
+        arg.add(argv3);
+        return arg;
 
     }
-
-    private static void changeDirectory(String directoryArgument)
-    {
-        Path targetPath;
-        String userName = System.getenv("USER");
-
-        if (directoryArgument.equals("~" + userName)) {
-            targetPath = Path.of(System.getenv("HOME"));
-        }
-        else if (directoryArgument.startsWith("~")) {
-            targetPath = Path.of(System.getenv("HOME") + directoryArgument.substring(1));
-        }
-        else {
-            targetPath = Path.of(directoryArgument);
-        }
-        Path absolutePath = Path.of(currentDirectory).resolve(targetPath);
-        //ignore the tempPath if it is absolute path
-        boolean directoryExists = false;
-
-        try{
-            absolutePath = absolutePath.toRealPath();
-            directoryExists = true;
-        } catch (IOException e) {
-            System.err.println("cd: " + directoryArgument + ": No such file or directory");
-        }
-        if (directoryExists) {
-            currentDirectory = absolutePath.toString();
-        }
+    public static String getvalueFromList(String argv1) {
+         return completorList.get(argv1);
     }
 }
