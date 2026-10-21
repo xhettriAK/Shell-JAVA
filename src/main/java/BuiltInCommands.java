@@ -97,14 +97,18 @@ public class BuiltInCommands {
             if (flag.get(pMask) && flag.get(cMask)) {
                 System.out.println("complete cant have both commands");
             } else if (flag.get(pMask)) {
-                if (list.isEmpty()) {
+                if (list.isEmpty() && command.isEmpty()) {
                     System.out.println();
                 }
                 else{
-                    if(!command.isEmpty())
+                    if(!command.isEmpty() && list.get(command)!=null)
                     {
                         System.out.println("complete -C '"+list.get(command)+"' " + command);
 
+                    }
+                    else if(!command.isEmpty() && list.get(command)==null)
+                    {
+                        System.out.println("complete: "+ command+": no completion specification");
                     }
                     else{
                         for(String key: list.keySet())
