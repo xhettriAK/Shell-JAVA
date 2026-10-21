@@ -67,7 +67,9 @@ public class LineReader {
             inputBuilder.append(completionText);
             System.out.print(completionText+ " ");
         }
-
+        if (!previousKeyWasTab) { //no matches
+            System.out.print("\u0007");
+        }
     }
     private void handleTab(char inputCharacter) {
 
