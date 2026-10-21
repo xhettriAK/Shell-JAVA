@@ -153,7 +153,7 @@ public class BuiltInCommands {
             argv3 =argv1;
         }
 
-        ExternalCommandRunner.executeCompletorCommand(completorList.get(argv1),argv2,argv3);
+        ExternalCommandRunner.executeCompletorCommand(completorList.get(argv1),argv1, argv2,argv3);
     }
     private static void printEcho(String argumentText) {
 
