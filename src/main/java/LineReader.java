@@ -213,6 +213,9 @@ public class LineReader {
                 previousKeyWasTab = false;
                 return "";
             }
+            else{
+                System.out.print("\u0007");
+            }
 
         }
         return completionSuffix;
