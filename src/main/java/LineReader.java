@@ -58,18 +58,19 @@ public class LineReader {
     }
     public  void applyCompletionMatcherComplete(String output, String userValue)
     {
-        if (output.equals(userValue)& !previousKeyWasTab) {
+        if(output!=null) {
+            if (output.equals(userValue) & !previousKeyWasTab) {
 
+                System.out.print("\u0007");
+            } else {
+                String completionText = output.substring(userValue.length()); //commonPrefix is longer than user
+                inputBuilder.append(completionText);
+                System.out.print(completionText + " ");
+            }
+        }else{
             System.out.print("\u0007");
         }
-        else {
-            String completionText = output.substring(userValue.length()); //commonPrefix is longer than user
-            inputBuilder.append(completionText);
-            System.out.print(completionText+ " ");
-        }
-        if (!previousKeyWasTab) { //no matches
-            System.out.print("\u0007");
-        }
+
     }
     private void handleTab(char inputCharacter) {
 
