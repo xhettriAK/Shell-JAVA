@@ -56,7 +56,7 @@ public class BuiltInCommands {
         }
     }
     private static void printCompletion(String argumentText) {
-        String[] CompletionFunction = {"-p", "-c"};
+        String[] CompletionFunction = {"-p", "-C"};
         String[] CompletionArguments = argumentText.trim().split(" ");
         String Value ="";
 
@@ -103,7 +103,7 @@ public class BuiltInCommands {
                 else{
                     if(!command.isEmpty())
                     {
-                        System.out.println("complete -C '"+list.get(command)+"'" + command);
+                        System.out.println("complete -C '"+list.get(command)+"' " + command);
 
                     }
                     else{
