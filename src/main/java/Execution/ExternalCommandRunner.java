@@ -8,7 +8,8 @@ import java.util.stream.Stream;
 
 public class ExternalCommandRunner {
 
-
+    private static ArrayList<Integer>jobs_Number=new ArrayList<>();
+    static int jobs = 0;
     public static Set<String> findExternalCommandCompletions(String prefix)
     {
         Set<String> matches = new TreeSet<>();
@@ -34,7 +35,8 @@ public class ExternalCommandRunner {
     }
 
 
-    private static void configureAndRunProcess(ProcessBuilder processBuilder, String outputFile, String errorFile, boolean appendOutput, boolean appendError) throws IOException, InterruptedException {
+    private static void configureAndRunProcess(ProcessBuilder processBuilder, String outputFile,
+                                               String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) throws IOException, InterruptedException {
         if(!outputFile.isBlank())
         {
             if(appendOutput)
@@ -62,7 +64,15 @@ public class ExternalCommandRunner {
          }
 
         Process process = processBuilder.start();
-        process.waitFor();
+         if(runInBackground) {
+             jobs++;
+             long pid = process.pid();
+             System.out.println(jobs+" "+ pid);
+         }
+         else{
+             process.waitFor();
+         }
+
     }
     private static boolean isCommandAvailable(String command) {
 
@@ -91,7 +101,8 @@ public class ExternalCommandRunner {
         }
             return output;
     }
-    public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile, String errorFile, boolean appendOutput, boolean appendError) {
+    public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile,
+                                              String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) {
         if (!isCommandAvailable(command)) {
             System.err.println(command + ": command not found");
         }
@@ -99,7 +110,7 @@ public class ExternalCommandRunner {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments);
             // directory as cd can change the directory , we can provide new process their  new directory
             try {
-                configureAndRunProcess(processBuilder, outputFile, errorFile, appendOutput, appendError);
+                configureAndRunProcess(processBuilder, outputFile, errorFile, appendOutput, appendError,runInBackground);
 
             } catch (IOException | InterruptedException e) {
                 System.err.println(command +": "+e.getMessage());

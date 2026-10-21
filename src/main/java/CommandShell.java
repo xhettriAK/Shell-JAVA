@@ -209,7 +209,12 @@ public class CommandShell {
                     System.setErr(originalError);
                 }
                 else{
-                    ExternalCommandRunner.executeExternalCommand(command, commandArguments, commandInfo.outputFile, commandInfo.errorFile, commandInfo.appendOutput, commandInfo.appendError);
+                    boolean runInBackground= commandArguments.getLast().equals("&");
+                    if(runInBackground)
+                    {
+                        commandArguments.remove(commandArguments.toArray().length-1);
+                    }
+                    ExternalCommandRunner.executeExternalCommand(command, commandArguments, commandInfo.outputFile, commandInfo.errorFile, commandInfo.appendOutput, commandInfo.appendError,runInBackground);
                 }
             }
         }

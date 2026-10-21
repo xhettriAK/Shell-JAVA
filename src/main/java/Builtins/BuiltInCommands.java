@@ -47,6 +47,7 @@ public interface BuiltInCommands{
             case "pwd" -> Pwd.printWorkingDirectory();
             case "cd" -> CD.changeDirectory(argumentText);
             case "complete"-> Complete.printCompletion(argumentText);
+            case "jobs"->Jobs.background(argumentText);
         }
     }
 }
