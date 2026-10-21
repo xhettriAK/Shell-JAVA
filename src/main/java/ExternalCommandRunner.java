@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
@@ -68,8 +69,13 @@ public class ExternalCommandRunner {
 
         return !PathUtils.findExecutable(command).isEmpty();
     }
-    public static String executeCompletorCommand(String path, String argv1, String argv2, String argv3)  {
+    public static String executeCompletorCommand(StringBuilder input, String path, String argv1, String argv2, String argv3)  {
+
         ProcessBuilder processBuilder = new ProcessBuilder(path,argv1, argv2,argv3);
+         Map<String,String> env = processBuilder.environment();
+         env.put("Comp_Line", input.toString());
+         env.put("Comp_Point",String.valueOf(input.length()));
+
         StringBuilder output= new StringBuilder();
         try {
             Process process = processBuilder.start();

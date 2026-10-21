@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 public class LineReader {
@@ -53,7 +54,7 @@ public class LineReader {
             argv3 =argv1;
         }
 
-        String output = ExternalCommandRunner.executeCompletorCommand(BuiltInCommands.getvalueFromList(argv1),argv1, argv2,argv3);
+        String output = ExternalCommandRunner.executeCompletorCommand(inputBuilder,BuiltInCommands.getvalueFromList(argv1),argv1, argv2,argv3);
         applyCompletionMatcherComplete(output,argv2);
     }
     public  void applyCompletionMatcherComplete(String output, String userValue)
@@ -80,6 +81,10 @@ public class LineReader {
         } else {
             if (inputBuilder.toString().contains(" ")) {
                 String command = "";
+                Path Comp_Line = Path.of(inputBuilder.toString());
+                Path Comp_Point = Path.of(String.valueOf(inputBuilder.length()));
+                System.setProperties((Properties) Comp_Line);
+                System.setProperties((Properties) Comp_Point);
                 command = inputBuilder.substring(0,inputBuilder.indexOf(" "));
                 if(BuiltInCommands.commandExistInCompleter(inputBuilder.toString())||
                         BuiltInCommands.commandExistInCompleter(command)) {
