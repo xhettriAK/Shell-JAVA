@@ -50,7 +50,7 @@ public class ExternalCommandRunner {
         }
         else {
 
-            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 
         }
          if(!errorFile.isBlank())
