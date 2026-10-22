@@ -18,13 +18,13 @@ public  class Jobs implements BuiltInCommands{
             if (Iterables.getLast(jobsInfo.keySet()).equals(jobs_id)) {
                 marker = "+";
             }
-            System.out.print("[" + jobs_id + "]" + marker + " ");
+            System.out.print("[" + jobs_id + "]" + marker + "  ");
 
             for (int i = info.toArray().length - 1; i > 0; i--) {
                 if (i == info.toArray().length - 1) {
                     System.out.format("%-24s", info.get(i));
                 } else {
-                    System.out.print(info.get(i) + " &");
+                    System.out.print(info.get(i) + "&");
                 }
 
             }
