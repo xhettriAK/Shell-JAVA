@@ -11,12 +11,21 @@ public  class Jobs implements BuiltInCommands{
 
     static void  printbackgroundInfo(String argumentText)
     {
-        String marker = "-";
+        String marker = "";
+        int index  =jobsInfo.keySet().size();
 
         for(String jobs_id : Jobs.jobsInfo.keySet()) {
             List<String> info = Jobs.jobsInfo.get(jobs_id);
-            if (Iterables.getLast(jobsInfo.keySet()).equals(jobs_id)) {
+            index--;
+            if (index ==1) {
                 marker = "+";
+            }
+            else if(index ==0)
+            {
+                marker = "-";
+            }
+            else{
+                marker = " ";
             }
             System.out.print("[" + jobs_id + "]" + marker + "  ");
 
