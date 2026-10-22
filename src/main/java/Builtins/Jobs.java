@@ -46,7 +46,11 @@ public  class Jobs implements BuiltInCommands{
                     System.out.format("%-24s", status);
                 }
                 else {
-                    System.out.print(info.get(i) + "&");
+                    System.out.println(info.get(i));
+                    if(!status.equals("Done"))
+                    {
+                        System.out.print("&");
+                    }
                 }
 
             }
