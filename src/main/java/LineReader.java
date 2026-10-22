@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static Execution.ExternalCommandRunner.executeCompletorCommand;
-
 public class LineReader {
     private  boolean previousKeyWasTab = false;
     private  StringBuilder inputBuilder = new StringBuilder();

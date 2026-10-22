@@ -1,7 +1,6 @@
 package Execution;
 
 import Builtins.Jobs;
-import com.google.common.collect.Iterables;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -50,7 +49,9 @@ public class ExternalCommandRunner {
             }
         }
         else {
-            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
+            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+
         }
          if(!errorFile.isBlank())
         {
@@ -63,14 +64,17 @@ public class ExternalCommandRunner {
             }
         } else{
              processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+
          }
 
         Process process = processBuilder.start();
-         if(runInBackground) {
+         if(runInBackground ) {
+
              job_ID++;
              long pid = process.pid();
-             Jobs.putjobsInfo(job_ID,pid,commandName,process.isAlive());
-             System.out.println("["+job_ID+"]"+" "+ pid);
+             Jobs.putJobsInfo(job_ID, pid, commandName, process.isAlive());
+             System.out.println("[" + job_ID + "]" + " " + pid);
+
          }
          else{
              process.waitFor();

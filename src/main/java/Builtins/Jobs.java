@@ -1,82 +1,77 @@
 package Builtins;
 
 import com.google.common.collect.*;
-import com.sun.security.jgss.GSSUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public  class Jobs implements BuiltInCommands{
-    private static ListMultimap<String, String> jobsInfo= ArrayListMultimap.create();
+    public  static HashMap<Integer, jobsInfo>listJobs = new LinkedHashMap<>();
+    public record jobsInfo( Long pid, String commandName,  int status)
+    {
 
+        public boolean Status() {
+            return isProcessRunning(pid);
+        }
+    }
+    public static ArrayList<Integer>jobIdToRemove = new ArrayList<>();
     private static boolean isProcessRunning(long pid)
     {
         Optional<ProcessHandle>currentProcess = ProcessHandle.of(pid);
         return currentProcess.isPresent() &&  currentProcess.get().isAlive();
 
     }
-    static void  printbackgroundInfo(String argumentText)
+    static void  printBackgroundInfo(String argumentText)
     {
         String marker = "";
-        String status = "Running";
-        ArrayList<Integer>jobsToDelete = new ArrayList<>();
-        for(String jobs_id : Jobs.jobsInfo.keySet()) {
-            List<String> info = Jobs.jobsInfo.get(jobs_id);
-            if (Integer.parseInt(jobs_id) ==jobsInfo.keySet().size()) {
+        String status = "";
+        int index = 0;
+        for(var ID : listJobs.keySet())
+        {
+            if( index == listJobs.size()-1)
+            {
                 marker = "+";
             }
-            else if(Integer.parseInt(jobs_id) ==jobsInfo.keySet().size()-1)
-            {
+            else if( index == listJobs.size()-2) {
                 marker = "-";
             }
             else{
                 marker = " ";
             }
-            System.out.print("[" + jobs_id + "]" + marker + "  ");
 
-            for (int i = info.toArray().length - 1; i >=0; i--) {
-                if(i==info.toArray().length-1){
-                    if(!isProcessRunning(Long.parseLong(info.get(i)))) {
-                        status = "Done";
-                        jobsToDelete.add(Integer.parseInt(jobs_id));
-                    }
-                }
-                else if (i == info.toArray().length - 2) {
-                    System.out.format("%-24s", status);
-                }
-                else {
-                    System.out.print(info.get(i));
-                    if(!status.equals("Done"))
-                    {
-                        System.out.print("&");
-                    }
-                }
-
+            if(!listJobs.get(ID).Status())
+            {
+                status = "Done";
+                jobIdToRemove.add(ID);
             }
-            status="Running";
+            else{
+                status= "Running";
+            }
+            index++;
+            System.out.print("["+ID+"]"+marker+"  ");
+            System.out.format("%-24s",status);
+            System.out.print(listJobs.get(ID).commandName);
+            if(status.equals("Running"))
+            {
+                System.out.print("&");
+            }
             System.out.println();
         }
-        if(!jobsToDelete.isEmpty())
+        if(!jobIdToRemove.isEmpty())
         {
-            for(var i: jobsToDelete)
+            for(var Id: jobIdToRemove)
             {
-                jobsInfo.removeAll(String.valueOf(i));
+                listJobs.remove(Id);
             }
-
         }
+
     }
-    public static void putjobsInfo(int jobs_id,Long pid, String commandName, boolean status )
+    public static void putJobsInfo(int jobs_id, Long pid, String commandName, boolean status )
     {
         String stat = "Not Running";
         if(status) {
             stat = "Running";
         }
-
-        Jobs.jobsInfo.put(String.valueOf(jobs_id),commandName);
-        Jobs.jobsInfo.put(String.valueOf(jobs_id),stat);
-        Jobs.jobsInfo.put(String.valueOf(jobs_id),String.valueOf(pid));
-
+         listJobs.put(jobs_id,new jobsInfo(pid,commandName,1));
     }
 }
 
