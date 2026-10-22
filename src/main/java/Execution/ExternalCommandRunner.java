@@ -77,6 +77,7 @@ public class ExternalCommandRunner {
          }
 
     }
+
     private static boolean isCommandAvailable(String command) {
 
         return !PathUtils.findExecutable(command).isEmpty();
