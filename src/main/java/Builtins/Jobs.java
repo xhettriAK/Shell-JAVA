@@ -1,12 +1,11 @@
 package Builtins;
-
 import com.google.common.collect.*;
-
 import java.util.*;
 
 public  class Jobs implements BuiltInCommands{
-    public  static HashMap<Integer, jobsInfo>listJobs = new LinkedHashMap<>();
-    public record jobsInfo( Long pid, String commandName,  int status)
+
+    private  static HashMap<Integer, jobsInfo>listJobs = new LinkedHashMap<>();
+    private record jobsInfo( Long pid, String commandName,  int status)
     {
 
         public boolean Status() {
@@ -20,7 +19,7 @@ public  class Jobs implements BuiltInCommands{
         return currentProcess.isPresent() &&  currentProcess.get().isAlive();
 
     }
-    static void  printBackgroundInfo(String argumentText)
+    public static void  printBackgroundInfo()
     {
         String marker = "";
         String status = "";
@@ -64,6 +63,46 @@ public  class Jobs implements BuiltInCommands{
             }
         }
 
+
+    }
+    public static boolean isJobListEmpty ()
+    {
+       return listJobs.isEmpty();
+    }
+    public static void Reap()
+    {
+        int index = 0;
+        String marker = "";
+        for(var ID : listJobs.keySet())
+        {
+            if( index == listJobs.size()-1)
+            {
+                marker = "+";
+            }
+            else if( index == listJobs.size()-2) {
+                marker = "-";
+            }
+            else{
+                marker = " ";
+            }
+            index++;
+            if(!listJobs.get(ID).Status())
+            {
+                jobIdToRemove.add(ID);
+                System.out.print("["+ID+"]"+marker+"  ");
+                System.out.format("%-24s","Done");
+                System.out.print(listJobs.get(ID).commandName);
+                System.out.println();
+            }
+
+        }
+        if(!jobIdToRemove.isEmpty())
+        {
+            for(var Id: jobIdToRemove)
+            {
+                listJobs.remove(Id);
+            }
+        }
     }
     public static void putJobsInfo(int jobs_id, Long pid, String commandName, boolean status )
     {
@@ -72,6 +111,7 @@ public  class Jobs implements BuiltInCommands{
             stat = "Running";
         }
          listJobs.put(jobs_id,new jobsInfo(pid,commandName,1));
+
     }
 }
 

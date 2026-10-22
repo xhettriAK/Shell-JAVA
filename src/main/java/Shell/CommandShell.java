@@ -1,4 +1,7 @@
+package Shell;
+
 import Builtins.BuiltInCommands;
+import Builtins.Jobs;
 import Execution.ExternalCommandRunner;
 import Execution.PathUtils;
 
@@ -161,6 +164,10 @@ public class CommandShell {
         String userInput="";
 
         while (true) {
+            if(!Jobs.isJobListEmpty())
+            {
+                Jobs.Reap();
+            }
             System.out.print("$ ");
             userInput = new LineReader().readUserInput(reader);
             if (userInput.isBlank()) {
@@ -217,6 +224,7 @@ public class CommandShell {
                     ExternalCommandRunner.executeExternalCommand(command, commandArguments, commandInfo.outputFile, commandInfo.errorFile, commandInfo.appendOutput, commandInfo.appendError,runInBackground);
                 }
             }
+
         }
     }
     public static PrintStream createPrintStream(boolean appendOutput, String fileName) throws IOException {

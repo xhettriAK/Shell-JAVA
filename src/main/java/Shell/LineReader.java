@@ -1,5 +1,8 @@
+package Shell;
+
 import Builtins.BuiltInCommands;
 import Builtins.Complete;
+import Builtins.Jobs;
 import Execution.ExternalCommandRunner;
 import Execution.PathUtils;
 import java.io.BufferedReader;
@@ -27,7 +30,9 @@ public class LineReader {
     }
     private void handleEnter(){
         previousKeyWasTab = false;
+
         System.out.println();
+
     }
     private void handlePrintableCharacter(char inputCharacter)
     {
