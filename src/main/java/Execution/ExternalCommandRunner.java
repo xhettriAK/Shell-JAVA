@@ -1,5 +1,8 @@
 package Execution;
 
+import Builtins.Jobs;
+import com.google.common.collect.Iterables;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,8 +11,7 @@ import java.util.stream.Stream;
 
 public class ExternalCommandRunner {
 
-    private static ArrayList<Integer>jobs_Number=new ArrayList<>();
-    static int jobs = 0;
+    static int job_ID = 0;
     public static Set<String> findExternalCommandCompletions(String prefix)
     {
         Set<String> matches = new TreeSet<>();
@@ -35,7 +37,7 @@ public class ExternalCommandRunner {
     }
 
 
-    private static void configureAndRunProcess(ProcessBuilder processBuilder, String outputFile,
+    private static void configureAndRunProcess(String commandName,ProcessBuilder processBuilder, String outputFile,
                                                String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) throws IOException, InterruptedException {
         if(!outputFile.isBlank())
         {
@@ -65,9 +67,10 @@ public class ExternalCommandRunner {
 
         Process process = processBuilder.start();
          if(runInBackground) {
-             jobs++;
+             job_ID++;
              long pid = process.pid();
-             System.out.println("["+jobs+"]"+" "+ pid);
+             Jobs.putjobsInfo(job_ID,pid,commandName,process.isAlive());
+             System.out.println("["+job_ID+"]"+" "+ pid);
          }
          else{
              process.waitFor();
@@ -103,6 +106,13 @@ public class ExternalCommandRunner {
     }
     public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile,
                                               String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) {
+        String commandName = "";
+        StringBuilder commandBuilder = new StringBuilder();
+        for(var i : commandArguments)
+        {
+            commandBuilder.append(i).append(" ");
+        }
+        commandName = commandBuilder.toString();
         if (!isCommandAvailable(command)) {
             System.err.println(command + ": command not found");
         }
@@ -110,7 +120,7 @@ public class ExternalCommandRunner {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments);
             // directory as cd can change the directory , we can provide new process their  new directory
             try {
-                configureAndRunProcess(processBuilder, outputFile, errorFile, appendOutput, appendError,runInBackground);
+                configureAndRunProcess( commandName,processBuilder, outputFile, errorFile, appendOutput, appendError,runInBackground);
 
             } catch (IOException | InterruptedException e) {
                 System.err.println(command +": "+e.getMessage());
