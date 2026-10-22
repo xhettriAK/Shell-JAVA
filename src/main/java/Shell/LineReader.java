@@ -30,7 +30,6 @@ public class LineReader {
     }
     private void handleEnter(){
         previousKeyWasTab = false;
-
         System.out.println();
 
     }

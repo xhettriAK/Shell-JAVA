@@ -69,11 +69,19 @@ public class ExternalCommandRunner {
 
         Process process = processBuilder.start();
          if(runInBackground ) {
-
-             job_ID++;
+            if(Jobs.isJobListEmpty()) {
+                job_ID = 1;
+            }
+            else if( job_ID !=Jobs.getLastJobId()){
+                job_ID = Jobs.getLastJobId()+1;
+            }
+            else{
+                job_ID++;
+            }
              long pid = process.pid();
              Jobs.putJobsInfo(job_ID, pid, commandName, process.isAlive());
              System.out.println("[" + job_ID + "]" + " " + pid);
+
 
          }
          else{

@@ -61,6 +61,7 @@ public  class Jobs implements BuiltInCommands{
             {
                 listJobs.remove(Id);
             }
+            jobIdToRemove.clear();
         }
 
 
@@ -102,14 +103,23 @@ public  class Jobs implements BuiltInCommands{
             {
                 listJobs.remove(Id);
             }
+            jobIdToRemove.clear();
         }
+    }
+    public static  int getLastJobId()
+    {   int index = 0;
+
+        for(var i : listJobs.keySet())
+        {
+            if (i == listJobs.size()) {
+                index= i;
+            }
+        }
+        return index;
     }
     public static void putJobsInfo(int jobs_id, Long pid, String commandName, boolean status )
     {
-        String stat = "Not Running";
-        if(status) {
-            stat = "Running";
-        }
+
          listJobs.put(jobs_id,new jobsInfo(pid,commandName,1));
 
     }
