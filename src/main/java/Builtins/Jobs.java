@@ -16,11 +16,10 @@ public  class Jobs implements BuiltInCommands{
 
         for(String jobs_id : Jobs.jobsInfo.keySet()) {
             List<String> info = Jobs.jobsInfo.get(jobs_id);
-            index--;
-            if (index ==1) {
+            if (Integer.parseInt(jobs_id) ==jobsInfo.keySet().size()) {
                 marker = "+";
             }
-            else if(index ==0)
+            else if(Integer.parseInt(jobs_id) ==jobsInfo.keySet().size()-1)
             {
                 marker = "-";
             }
