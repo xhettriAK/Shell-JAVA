@@ -1,26 +1,21 @@
 package Builtins;
-import com.google.common.collect.*;
 import java.util.*;
 
 public  class Jobs implements BuiltInCommands{
-
-    private  static HashMap<Integer, jobsInfo>listJobs = new LinkedHashMap<>();
     private record jobsInfo( Long pid, String commandName,  int status)
-    {
-
-        public boolean Status() {
-            return isProcessRunning(pid);
-        }
+    {   public boolean Status() {
+            return !isProcessRunning(pid);
+         }
     }
+    private  static HashMap<Integer, jobsInfo>listJobs = new LinkedHashMap<>();
     public static ArrayList<Integer>jobIdToRemove = new ArrayList<>();
-    private static boolean isProcessRunning(long pid)
-    {
+
+    private static boolean isProcessRunning(long pid) {
         Optional<ProcessHandle>currentProcess = ProcessHandle.of(pid);
         return currentProcess.isPresent() &&  currentProcess.get().isAlive();
 
     }
-    public static void  printBackgroundInfo()
-    {
+    public static void  printBackgroundInfo() {
         String marker = "";
         String status = "";
         int index = 0;
@@ -37,7 +32,7 @@ public  class Jobs implements BuiltInCommands{
                 marker = " ";
             }
 
-            if(!listJobs.get(ID).Status())
+            if(listJobs.get(ID).Status())
             {
                 status = "Done";
                 jobIdToRemove.add(ID);
@@ -66,12 +61,10 @@ public  class Jobs implements BuiltInCommands{
 
 
     }
-    public static boolean isJobListEmpty ()
-    {
+    public static boolean isJobListEmpty () {
        return listJobs.isEmpty();
     }
-    public static void Reap()
-    {
+    public static void Reap() {
         int index = 0;
         String marker = "";
         for(var ID : listJobs.keySet())
@@ -87,7 +80,7 @@ public  class Jobs implements BuiltInCommands{
                 marker = " ";
             }
             index++;
-            if(!listJobs.get(ID).Status())
+            if(listJobs.get(ID).Status())
             {
                 jobIdToRemove.add(ID);
                 System.out.print("["+ID+"]"+marker+"  ");
@@ -106,8 +99,7 @@ public  class Jobs implements BuiltInCommands{
             jobIdToRemove.clear();
         }
     }
-    public static  int getLastJobId()
-    {   int index = 0;
+    public static  int getLastJobId() {   int index = 0;
 
         for(var i : listJobs.keySet())
         {
@@ -117,10 +109,8 @@ public  class Jobs implements BuiltInCommands{
         }
         return index;
     }
-    public static void putJobsInfo(int jobs_id, Long pid, String commandName, boolean status )
-    {
-
-         listJobs.put(jobs_id,new jobsInfo(pid,commandName,1));
+    public static void putJobsInfo(int jobs_id, Long pid, String commandName, boolean status ) {
+        listJobs.put(jobs_id,new jobsInfo(pid,commandName,1));
 
     }
 }

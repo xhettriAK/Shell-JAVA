@@ -1,4 +1,5 @@
 import Shell.CommandShell;
+import Shell.TerminalMode;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

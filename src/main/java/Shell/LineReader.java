@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 public class LineReader {
+    private boolean isPipeLineIndexCorrect = false;
     private  boolean previousKeyWasTab = false;
     private  StringBuilder inputBuilder = new StringBuilder();
     private boolean isDirectory = false;
@@ -111,7 +112,7 @@ public class LineReader {
         previousKeyWasTab = true;
     }
 
-    public  String readUserInput(BufferedReader reader) throws IOException
+    public  String readUserInput(BufferedReader reader, boolean CommandShouldWork) throws IOException
     {
         char inputCharacter;
         int inputCode;
@@ -139,7 +140,7 @@ public class LineReader {
                 }
             }
         }
-        return inputBuilder.toString();
+        return inputBuilder.toString().strip();
     }
 
     private void applyCompletionMatches(String userPrefix, Set<String>matches) {

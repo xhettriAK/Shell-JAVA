@@ -8,6 +8,7 @@ import static Builtins.Pwd.printWorkingDirectory;
 
 public interface BuiltInCommands{
       String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete","jobs"};
+
      static String completeBuiltInCommand(String commandPrefix)
     {
         for (var command : BUILT_IN_COMMANDS)

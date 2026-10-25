@@ -1,6 +1,7 @@
 package Execution;
 
 import Builtins.Jobs;
+import Builtins.WorkingDirectory;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -117,26 +118,54 @@ public class ExternalCommandRunner {
         }
             return output;
     }
-    public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile,
-                                              String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) {
-        String commandName = "";
-        StringBuilder commandBuilder = new StringBuilder();
+    public static void executeExternalCommandPipeLine(List<ProcessBuilder>commandArguments)
+    {
         for(var i : commandArguments)
         {
-            commandBuilder.append(i).append(" ");
-        }
-        commandName = commandBuilder.toString();
-        if (!isCommandAvailable(command)) {
-            System.err.println(command + ": command not found");
-        }
-        else {
-            ProcessBuilder processBuilder = new ProcessBuilder(commandArguments);
-            // directory as cd can change the directory , we can provide new process their  new directory
-            try {
-                configureAndRunProcess( commandName,processBuilder, outputFile, errorFile, appendOutput, appendError,runInBackground);
+            i.redirectError(ProcessBuilder.Redirect.INHERIT);
 
-            } catch (IOException | InterruptedException e) {
-                System.err.println(command +": "+e.getMessage());
+        }
+        commandArguments.getFirst().redirectInput(ProcessBuilder.Redirect.INHERIT);
+        commandArguments.getLast().redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        try {
+            List<Process> processes = ProcessBuilder.startPipeline(commandArguments);
+            //Get output of last process;
+            processes.wait();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+
+    }
+    public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile,
+                                              String errorFile, boolean appendOutput,
+                                              boolean appendError, boolean runInBackground, int pipeStatus) {
+
+        String commandName = "";
+        StringBuilder commandBuilder = new StringBuilder();
+        List<ProcessBuilder> process = new ArrayList<>();
+        if (pipeStatus==1) {
+            for (var i : commandArguments) {
+                if (!i.equals("|")) {
+                    process.add(new ProcessBuilder(i).directory(new File((WorkingDirectory.getCurrentDirectory()))));
+                }
+            }
+            executeExternalCommandPipeLine(process);
+        } else {
+            for (var i : commandArguments) {
+                commandBuilder.append(i).append(" ");
+            }
+            commandName = commandBuilder.toString();
+            if (!isCommandAvailable(command)) {
+                System.err.println(command + ": command not found");
+            } else {
+                ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
+                // directory as cd can change the directory , we can provide new process their  new directory
+                try {
+                    configureAndRunProcess(commandName, processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
+
+                } catch (IOException | InterruptedException e) {
+                    System.err.println(command + ": " + e.getMessage());
+                }
             }
         }
     }
