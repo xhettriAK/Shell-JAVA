@@ -136,20 +136,13 @@ public class ExternalCommandRunner {
         }
 
     }
-    public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile,
+    public static void executeExternalCommand( List<String> commandArguments, String outputFile,
                                               String errorFile, boolean appendOutput,
                                               boolean appendError, boolean runInBackground) {
 
-        String commandName = "";
-        StringBuilder commandBuilder = new StringBuilder();
-        List<ProcessBuilder> process = new ArrayList<>();
-
-        for (var i : commandArguments) {
-            commandBuilder.append(i).append(" ");
-        }
-        commandName = commandBuilder.toString();
-        if (!isCommandAvailable(command)) {
-            System.err.println(command + ": command not found");
+        String commandName = commandArguments.getFirst();
+        if (!isCommandAvailable(commandName)) {
+            System.err.println(commandName + ": command not found");
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
             // directory as cd can change the directory , we can provide new process their  new directory
@@ -157,7 +150,7 @@ public class ExternalCommandRunner {
                 configureAndRunProcess(commandName, processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
 
             } catch (IOException | InterruptedException e) {
-                System.err.println(command + ": " + e.getMessage());
+                System.err.println(commandName + ": " + e.getMessage());
             }
         }
 
