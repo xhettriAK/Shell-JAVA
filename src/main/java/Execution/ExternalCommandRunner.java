@@ -138,35 +138,28 @@ public class ExternalCommandRunner {
     }
     public static void executeExternalCommand(String command, List<String> commandArguments, String outputFile,
                                               String errorFile, boolean appendOutput,
-                                              boolean appendError, boolean runInBackground, int pipeStatus) {
+                                              boolean appendError, boolean runInBackground) {
 
         String commandName = "";
         StringBuilder commandBuilder = new StringBuilder();
         List<ProcessBuilder> process = new ArrayList<>();
-        if (pipeStatus==1) {
-            for (var i : commandArguments) {
-                if (!i.equals("|")) {
-                    process.add(new ProcessBuilder(i).directory(new File((WorkingDirectory.getCurrentDirectory()))));
-                }
-            }
-            executeExternalCommandPipeLine(process);
-        } else {
-            for (var i : commandArguments) {
-                commandBuilder.append(i).append(" ");
-            }
-            commandName = commandBuilder.toString();
-            if (!isCommandAvailable(command)) {
-                System.err.println(command + ": command not found");
-            } else {
-                ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
-                // directory as cd can change the directory , we can provide new process their  new directory
-                try {
-                    configureAndRunProcess(commandName, processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
 
-                } catch (IOException | InterruptedException e) {
-                    System.err.println(command + ": " + e.getMessage());
-                }
+        for (var i : commandArguments) {
+            commandBuilder.append(i).append(" ");
+        }
+        commandName = commandBuilder.toString();
+        if (!isCommandAvailable(command)) {
+            System.err.println(command + ": command not found");
+        } else {
+            ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
+            // directory as cd can change the directory , we can provide new process their  new directory
+            try {
+                configureAndRunProcess(commandName, processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
+
+            } catch (IOException | InterruptedException e) {
+                System.err.println(command + ": " + e.getMessage());
             }
         }
+
     }
 }

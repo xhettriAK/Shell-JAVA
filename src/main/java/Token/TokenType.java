@@ -1,6 +1,6 @@
 package Token;
 
-enum TokenType{
+public enum TokenType{
     WORD,
     PIPE,
     REDIRECT_OUT,
@@ -8,5 +8,6 @@ enum TokenType{
     APPEND_ERR,
     APPEND_OUT,
     BACKGROUND,
-    END
+     END,
+    NONE
 }

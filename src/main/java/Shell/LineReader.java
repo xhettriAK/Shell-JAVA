@@ -134,13 +134,14 @@ public class LineReader {
                     handleEnter();
                     break;
                 }
-                if(inputCharacter=='\t')
-                {
-                    handleTab(inputCharacter);
+                if(CommandShouldWork) {
+                    if (inputCharacter == '\t') {
+                        handleTab(inputCharacter);
+                    }
                 }
             }
         }
-        return inputBuilder.toString().strip();
+        return inputBuilder.toString();
     }
 
     private void applyCompletionMatches(String userPrefix, Set<String>matches) {
