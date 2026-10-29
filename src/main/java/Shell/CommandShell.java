@@ -1,6 +1,7 @@
 package Shell;
 
 import Builtins.BuiltInCommands;
+import Builtins.History.History;
 import Builtins.Jobs;
 import Execution.ExternalCommandRunner;
 import Execution.PathUtils;
@@ -53,6 +54,7 @@ public class CommandShell {
                 startingNewCommand = false;
                 continue;
             }
+            History.create(userInput);
             if (pipeline.size() == 1) {
                 Parser.CommandInformation commandInfo = pipeline.getFirst();
                 List<String> arguments = commandInfo.arguments();

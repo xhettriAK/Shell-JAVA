@@ -1,10 +1,8 @@
 package Builtins;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
+import Builtins.History.History;
 
-import static Builtins.Pwd.printWorkingDirectory;
+import java.util.*;
 
 public interface BuiltInCommands{
       String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete","jobs","history"};
@@ -49,7 +47,7 @@ public interface BuiltInCommands{
             case "cd" -> CD.changeDirectory(argumentText);
             case "complete"-> Complete.printCompletion(argumentText);
             case "jobs"->Jobs.printBackgroundInfo();
-            case "history"->History.createHistoryFile();
+            case "history" -> History.run(argumentText);
         }
     }
 }

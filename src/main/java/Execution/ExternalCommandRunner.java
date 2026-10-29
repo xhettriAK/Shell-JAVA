@@ -39,8 +39,7 @@ public class ExternalCommandRunner {
         return matches;
     }
 
-
-    private static void configureAndRunProcess(String commandName,String fullcommand,ProcessBuilder processBuilder, String outputFile,
+    private static void configureAndRunProcess(String fullCommand, ProcessBuilder processBuilder, String outputFile,
                                                String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) throws IOException, InterruptedException {
         if(!outputFile.isBlank())
         {
@@ -83,7 +82,7 @@ public class ExternalCommandRunner {
                 job_ID++;
             }
              long pid = process.pid();
-             Jobs.putJobsInfo(job_ID, pid, fullcommand, process.isAlive());
+             Jobs.putJobsInfo(job_ID, pid, fullCommand, process.isAlive());
              System.out.println("[" + job_ID + "]" + " " + pid);
 
 
@@ -138,7 +137,7 @@ public class ExternalCommandRunner {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
             // directory as cd can change the directory , we can provide new process their  new directory
             try {
-                configureAndRunProcess(commandName, s,processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
+                configureAndRunProcess(s,processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
 
             } catch (IOException | InterruptedException e) {
                 System.err.println(commandName + ": " + e.getMessage());
