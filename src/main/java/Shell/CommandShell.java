@@ -100,7 +100,7 @@ public class CommandShell {
                 boolean unsupported = false;
 
                 for(int i = 0;i<commandRecord.size(); i++) {
-                    String command = commandRecord.get(i).arguments().get(i);
+                    String command = commandRecord.get(i).arguments().getFirst();
                     if(command.isBlank()||(!BuiltInCommands.isBuiltInCommand(command) && ExternalCommandRunner.isCommandAvailable(command))){
                         System.err.println("shell: Unknown command " +command);
                         System.err.println(userInput);
