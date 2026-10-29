@@ -20,7 +20,7 @@ public class History implements BuiltInCommands {
                 System.out.println("something went wrong");
                 break;
             }
-            System.out.println(value);
+            System.out.println(i+1+" "+ value);
 
         }
 
