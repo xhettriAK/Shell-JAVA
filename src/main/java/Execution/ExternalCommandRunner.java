@@ -40,7 +40,7 @@ public class ExternalCommandRunner {
     }
 
 
-    private static void configureAndRunProcess(String commandName,ProcessBuilder processBuilder, String outputFile,
+    private static void configureAndRunProcess(String commandName,String fullcommand,ProcessBuilder processBuilder, String outputFile,
                                                String errorFile, boolean appendOutput, boolean appendError, boolean runInBackground) throws IOException, InterruptedException {
         if(!outputFile.isBlank())
         {
@@ -83,7 +83,7 @@ public class ExternalCommandRunner {
                 job_ID++;
             }
              long pid = process.pid();
-             Jobs.putJobsInfo(job_ID, pid, commandName, process.isAlive());
+             Jobs.putJobsInfo(job_ID, pid, fullcommand, process.isAlive());
              System.out.println("[" + job_ID + "]" + " " + pid);
 
 
@@ -126,13 +126,19 @@ public class ExternalCommandRunner {
                                               boolean appendError, boolean runInBackground) {
 
         String commandName = commandArguments.getFirst();
+        StringBuilder commandArgs = new StringBuilder();
+        for(var i : commandArguments)
+        {
+            commandArgs.append(i);
+        }
+       String s=  commandArgs.toString();
         if (isCommandAvailable(commandName)) {
             System.err.println(commandName + ": command not found");
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
             // directory as cd can change the directory , we can provide new process their  new directory
             try {
-                configureAndRunProcess(commandName, processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
+                configureAndRunProcess(commandName, s,processBuilder, outputFile, errorFile, appendOutput, appendError, runInBackground);
 
             } catch (IOException | InterruptedException e) {
                 System.err.println(commandName + ": " + e.getMessage());
