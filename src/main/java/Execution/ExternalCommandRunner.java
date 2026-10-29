@@ -129,7 +129,7 @@ public class ExternalCommandRunner {
         StringBuilder commandArgs = new StringBuilder();
         for(var i : commandArguments)
         {
-            commandArgs.append(i).append(" ")
+            commandArgs.append(i).append(" ");
         }
        String s=  commandArgs.toString();
         if (isCommandAvailable(commandName)) {
