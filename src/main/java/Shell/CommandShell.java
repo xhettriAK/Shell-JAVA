@@ -48,17 +48,14 @@ public class CommandShell {
                 System.err.println(userInput);
                 System.err.println(s);
             }
-
-            List<String> commandArgumentValues;
             if (lex.isInComplete()||commandParser.isIncomplete()) {
                 isThisFirstTimeParser = false;
                 continue;
             }
-            String command = "";
             if(commandRecord.size()==1) {
-                command = commandRecord.getFirst().arguments().getFirst();
+               String command = commandRecord.getFirst().arguments().getFirst();
                 List<String> commandArguments = commandRecord.getFirst().arguments();
-                commandArgumentValues = commandArguments.subList(1,commandArguments.toArray().length);
+                List<String>commandArgumentValues = commandArguments.subList(1,commandArguments.toArray().length);
 
                 String outputFile = commandRecord.getFirst().outputFile();
                 String errorFile = commandRecord.getFirst().errorFile();
@@ -97,11 +94,81 @@ public class CommandShell {
                     ExternalCommandRunner.executeExternalCommand(commandArguments, outputFile, errorFile,
                             appendOutput, appendError, runInBackground);
                 }
+            }else{
+                String outputFile = "";
+                boolean appendOutput = false;
+                boolean unsupported = false;
+
+                for(int i = 0;i<commandRecord.size(); i++) {
+                    String command = commandRecord.get(i).arguments().get(i);
+                    if(command.isBlank()||(!BuiltInCommands.isBuiltInCommand(command) && ExternalCommandRunner.isCommandAvailable(command))){
+                        System.err.println("shell: Unknown command " +command);
+                        System.err.println(userInput);
+                        System.err.println();
+                        unsupported = true;
+                    }
+                    if(i<commandRecord.size()-1 && !commandRecord.get(i).outputFile().isBlank()){
+                        System.err.println("shell: Unsupported :(");
+                        //java doesnt support this feature
+                        System.err.println(userInput);
+                        unsupported =true;
+                    }else if(i==commandRecord.size()-1 && !commandRecord.get(i).outputFile().isBlank())
+                    {
+                        outputFile = commandRecord.getLast().outputFile();
+                        appendOutput = commandRecord.getLast().outputType()==TokenType.APPEND_OUT;
+                    }
+                }
+                if(!unsupported){
+                    String command;
+                    List<String> argument;
+                    List<String>commandArguments;
+                    List<Parser.CommandInformation>External= new ArrayList<>();
+                    ByteArrayOutputStream memoryBuffer = null;
+                    boolean isThisLastCommand = false;
+
+                    for (int i = 0; i< commandRecord.size();i++) {
+                        commandArguments = commandRecord.get(i).arguments();
+                        command = commandArguments.getFirst();
+                        argument = commandArguments.subList(1, commandArguments.toArray().length);
+                        PrintStream originalOut = System.out;
+                        boolean isCommandAfterExternalisBuiltin= false;
+                        if(i==commandRecord.size()-1){
+                            isThisLastCommand = true;
+                        }
+                        if (BuiltInCommands.isBuiltInCommand(command)) {
+                            if(!External.isEmpty()) {
+                                ExternalCommandRunner.executeCommandPipe(External, memoryBuffer, false,outputFile,appendOutput);
+                                if (memoryBuffer != null) {
+                                    memoryBuffer.reset();
+                                }
+                                External.clear();
+                            }
+                            if(isThisLastCommand){
+                                BuiltInCommands.executeBuiltInCommand(command, argument);
+                            }else {
+                                memoryBuffer = new ByteArrayOutputStream();
+                                PrintStream customStream = new PrintStream(memoryBuffer);
+                                System.setOut(customStream);
+                                BuiltInCommands.executeBuiltInCommand(command, argument);
+                                isCommandAfterExternalisBuiltin = true;
+                                System.setOut(originalOut);
+                            }
+                        } else {
+                            External.add(commandRecord.get(i));
+                        }
+                        if(!External.isEmpty() && (isCommandAfterExternalisBuiltin || isThisLastCommand)) {
+                            ExternalCommandRunner.executeCommandPipe(External, memoryBuffer, isThisLastCommand,outputFile,appendOutput);
+                            if (memoryBuffer != null) {
+                                memoryBuffer.reset();
+                            }
+                            External.clear();
+                        }
+                    }
+                }
             }
             isThisFirstTimeParser = true;
         }
     }
-
 
     public static PrintStream createPrintStream(boolean appendOutput, String fileName) throws IOException {
         if (appendOutput) {

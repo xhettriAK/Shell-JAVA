@@ -11,7 +11,6 @@ public class Lexer {
     private boolean inComplete = false;
 
     public Lexer(String source) {
-
         this.source = source;
     }
 

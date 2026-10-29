@@ -2,6 +2,8 @@ package Execution;
 
 import Builtins.Jobs;
 import Builtins.WorkingDirectory;
+import Token.Parser;
+import Token.TokenType;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.util.stream.Stream;
 public class ExternalCommandRunner {
 
     static int job_ID = 0;
+
     public static Set<String> findExternalCommandCompletions(String prefix)
     {
         Set<String> matches = new TreeSet<>();
@@ -91,9 +94,8 @@ public class ExternalCommandRunner {
 
     }
 
-    private static boolean isCommandAvailable(String command) {
-
-        return !PathUtils.findExecutable(command).isEmpty();
+    public static boolean isCommandAvailable(String command) {
+        return PathUtils.findExecutable(command).isEmpty();
     }
     public static Set<String> executeCompletorCommand(StringBuilder input, String path, String argv1, String argv2, String argv3)  {
 
@@ -118,30 +120,13 @@ public class ExternalCommandRunner {
         }
             return output;
     }
-    public static void executeExternalCommandPipeLine(List<ProcessBuilder>commandArguments)
-    {
-        for(var i : commandArguments)
-        {
-            i.redirectError(ProcessBuilder.Redirect.INHERIT);
 
-        }
-        commandArguments.getFirst().redirectInput(ProcessBuilder.Redirect.INHERIT);
-        commandArguments.getLast().redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        try {
-            List<Process> processes = ProcessBuilder.startPipeline(commandArguments);
-            //Get output of last process;
-            processes.wait();
-        } catch (Exception e) {
-            System.err.println(e);
-        }
-
-    }
     public static void executeExternalCommand( List<String> commandArguments, String outputFile,
                                               String errorFile, boolean appendOutput,
                                               boolean appendError, boolean runInBackground) {
 
         String commandName = commandArguments.getFirst();
-        if (!isCommandAvailable(commandName)) {
+        if (isCommandAvailable(commandName)) {
             System.err.println(commandName + ": command not found");
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
@@ -155,4 +140,60 @@ public class ExternalCommandRunner {
         }
 
     }
+    public static void executeCommandPipe(List<Parser.CommandInformation>externalRecord, ByteArrayOutputStream customStream
+                                           ,boolean isThisLastCommand,String outputFile,boolean appendOutput) {
+        List<ProcessBuilder> processBuilders = new ArrayList<>();
+        for (int i = 0; i < externalRecord.size(); i++) {
+
+            ProcessBuilder p = new ProcessBuilder(externalRecord.get(i).arguments()).directory(new File(WorkingDirectory.getCurrentDirectory()));
+            if(isThisLastCommand && i ==externalRecord.size()-1){
+                if(!outputFile.isBlank())
+                {
+                    if(appendOutput)
+                    {
+                        p.redirectOutput(ProcessBuilder.Redirect.appendTo(PathUtils.resolveFromCurrentDirectory(outputFile).toFile()));
+                    }
+                    else {
+                        p.redirectOutput(PathUtils.resolveFromCurrentDirectory(outputFile).toFile());
+                    }
+                }else {
+                    p.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                }
+            } else {
+                p.redirectError(ProcessBuilder.Redirect.INHERIT);
+                p.redirectOutput(ProcessBuilder.Redirect.PIPE);
+
+            }
+            if (!externalRecord.get(i).errorFile().isBlank()) {
+                boolean appendError = externalRecord.get(i).errorType() == TokenType.APPEND_ERR;
+                if (appendError) {
+                    p.redirectError(ProcessBuilder.Redirect.appendTo(PathUtils.resolveFromCurrentDirectory(externalRecord.get(i).errorFile()).toFile()));
+                } else {
+                    p.redirectError(PathUtils.resolveFromCurrentDirectory(externalRecord.get(i).errorFile()).toFile());
+                }
+            }
+            processBuilders.add(p);
+
+        }
+        try {
+
+            List<Process> processes = ProcessBuilder.startPipeline(processBuilders);
+            //Get output of last process;
+            if(customStream!=null){
+                try (var firstProcessInput = processes.getFirst().getOutputStream()) {
+                    customStream.writeTo(firstProcessInput);
+                }
+            }
+            for (Process p : processes) {
+                p.waitFor();
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+
+    }
+
+
+
+
 }

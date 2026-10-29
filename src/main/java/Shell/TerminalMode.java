@@ -20,7 +20,6 @@ public class TerminalMode {
                 savedTerminalSettings = reader.readLine();
             }
            exitStatus = process.waitFor();
-
         } catch (IOException | InterruptedException e) {
             System.out.println("something went wrong");
         }
@@ -60,11 +59,9 @@ public class TerminalMode {
     }
     public static void initialize()
     {
-        if (saveCurrentTerminalSettings() && savedTerminalSettings != null)
-        {
+        if (saveCurrentTerminalSettings() && savedTerminalSettings != null) {
              rawModeEnabled = enableRawMode();
-             if(rawModeEnabled)
-             {
+             if(rawModeEnabled) {
                  Runtime runtime = Runtime.getRuntime();
                  //getting the runtime envirnoment
                  runtime.addShutdownHook(new Thread(TerminalMode::restoreTerminalMode));

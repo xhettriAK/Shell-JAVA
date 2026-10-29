@@ -2,7 +2,6 @@ package Shell;
 
 import Builtins.BuiltInCommands;
 import Builtins.Complete;
-import Builtins.Jobs;
 import Execution.ExternalCommandRunner;
 import Execution.PathUtils;
 import java.io.BufferedReader;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 public class LineReader {
-    private boolean isPipeLineIndexCorrect = false;
     private  boolean previousKeyWasTab = false;
     private  StringBuilder inputBuilder = new StringBuilder();
     private boolean isDirectory = false;

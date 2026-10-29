@@ -72,7 +72,7 @@ public class Parser {
         }
         if (arguments.isEmpty()) {
             Token peeked = peek();
-            throw new ParserError(peeked.offset(), peeked.length(), "expected a “unexpected token "+peek().literal());
+            throw new ParserError(peeked.offset(), peeked.length(), "expected a “unexpected token\" "+peek().literal());
         }
         return new CommandInformation(arguments, outputType, outputFile, errorType, errorFile);
     }
