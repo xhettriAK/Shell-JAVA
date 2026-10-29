@@ -14,53 +14,55 @@ import java.util.List;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 public class CommandShell {
-    private  static boolean isThisFirstTimeParser = true;
+    // false while the previous line was incomplete and we are reading its continuation
+    private static boolean startingNewCommand = true;
 
-    public static void run(BufferedReader reader) throws ParserError,IOException  {
-        String userInput="";
+    public static void run(BufferedReader reader) throws ParserError, IOException {
+        String userInput = "";
         while (true) {
-            if(!Jobs.isJobListEmpty()) {
+            if (!Jobs.isJobListEmpty()) {
                 Jobs.Reap();
             }
-            if(isThisFirstTimeParser) {
-                userInput="";
+            if (startingNewCommand) {
+                userInput = "";
                 System.out.print("$ ");
-            }
-            else {
+            } else {
                 System.out.print("> ");
             }
-            userInput+= new LineReader().readUserInput(reader, isThisFirstTimeParser);
+            userInput += new LineReader().readUserInput(reader, startingNewCommand);
 
-            Lexer lex = new Lexer(userInput);
-            Parser commandParser = new Parser(lex.scanTokens());
-            List<Parser.CommandInformation>commandRecord= new ArrayList<>();
+            Lexer lexer = new Lexer(userInput);
+            Parser parser = new Parser(lexer.scanTokens());
+            List<Parser.CommandInformation> pipeline = new ArrayList<>();
             if (userInput.isBlank()) {
                 continue;
             }
-            if("exit".equals(userInput)) {
+            if ("exit".equals(userInput)) {
                 break;
-            }try {
-                commandRecord = commandParser.parse();
+            }
+            try {
+                pipeline = parser.parse();
             } catch (ParserError e) {
                 int length = Math.max(e.getLength(), 1);
-                String s = " ".repeat(e.getOffset())+"^".repeat(length);
-                System.err.println("shell: "+e.getMessage());
+                String errorMarker = " ".repeat(e.getOffset()) + "^".repeat(length);
+                System.err.println("shell: " + e.getMessage());
                 System.err.println(userInput);
-                System.err.println(s);
+                System.err.println(errorMarker);
             }
-            if (lex.isInComplete()||commandParser.isIncomplete()) {
-                isThisFirstTimeParser = false;
+            if (lexer.isInComplete() || parser.isIncomplete()) {
+                startingNewCommand = false;
                 continue;
             }
-            if(commandRecord.size()==1) {
-               String command = commandRecord.getFirst().arguments().getFirst();
-                List<String> commandArguments = commandRecord.getFirst().arguments();
-                List<String>commandArgumentValues = commandArguments.subList(1,commandArguments.toArray().length);
+            if (pipeline.size() == 1) {
+                Parser.CommandInformation commandInfo = pipeline.getFirst();
+                List<String> arguments = commandInfo.arguments();
+                String command = arguments.getFirst();
+                List<String> commandArguments = arguments.subList(1, arguments.size());
 
-                String outputFile = commandRecord.getFirst().outputFile();
-                String errorFile = commandRecord.getFirst().errorFile();
-                boolean appendOutput = commandRecord.getFirst().outputType()==TokenType.APPEND_OUT;
-                boolean appendError = commandRecord.getFirst().errorType() ==TokenType.APPEND_ERR;
+                String outputFile = commandInfo.outputFile();
+                String errorFile = commandInfo.errorFile();
+                boolean appendOutput = commandInfo.outputType() == TokenType.APPEND_OUT;
+                boolean appendError = commandInfo.errorType() == TokenType.APPEND_ERR;
 
                 if (BuiltInCommands.isBuiltInCommand(command)) {
                     PrintStream originalOut = System.out;
@@ -85,88 +87,101 @@ public class CommandShell {
                             System.out.println(errorFile + ": no file or directory");
                         }
                     }
-                    BuiltInCommands.executeBuiltInCommand(command, commandArgumentValues);
+                    BuiltInCommands.executeBuiltInCommand(command, commandArguments);
                     System.setOut(originalOut);
                     System.setErr(originalError);
                 } else {
-                    boolean runInBackground = commandParser.isRunInBackground();
+                    boolean runInBackground = parser.isRunInBackground();
 
-                    ExternalCommandRunner.executeExternalCommand(commandArguments, outputFile, errorFile,
+                    ExternalCommandRunner.executeExternalCommand(arguments, outputFile, errorFile,
                             appendOutput, appendError, runInBackground);
                 }
-            }else{
+            } else {
                 String outputFile = "";
                 boolean appendOutput = false;
-                boolean unsupported = false;
+                boolean pipelineInvalid = false;
 
-                for(int i = 0;i<commandRecord.size(); i++) {
-                    String command = commandRecord.get(i).arguments().getFirst();
-                    if(command.isBlank()||(!BuiltInCommands.isBuiltInCommand(command) && ExternalCommandRunner.isCommandAvailable(command))){
-                        System.err.println("shell: Unknown command " +command);
+                for (int i = 0; i < pipeline.size(); i++) {
+                    String command = pipeline.get(i).arguments().getFirst();
+                    if (command.isBlank() || (!BuiltInCommands.isBuiltInCommand(command) && ExternalCommandRunner.isCommandNotAvailable(command))) {
+                        System.err.println("shell: Unknown command " + command);
                         System.err.println(userInput);
                         System.err.println();
-                        unsupported = true;
+                        pipelineInvalid = true;
                     }
-                    if(i<commandRecord.size()-1 && !commandRecord.get(i).outputFile().isBlank()){
+                    if (i < pipeline.size() - 1 && !pipeline.get(i).outputFile().isBlank()) {
                         System.err.println("shell: Unsupported :(");
                         //java doesnt support this feature
                         System.err.println(userInput);
-                        unsupported =true;
-                    }else if(i==commandRecord.size()-1 && !commandRecord.get(i).outputFile().isBlank())
-                    {
-                        outputFile = commandRecord.getLast().outputFile();
-                        appendOutput = commandRecord.getLast().outputType()==TokenType.APPEND_OUT;
+                        pipelineInvalid = true;
+                    } else if (i == pipeline.size() - 1 && !pipeline.get(i).outputFile().isBlank()) {
+                        outputFile = pipeline.getLast().outputFile();
+                        appendOutput = pipeline.getLast().outputType() == TokenType.APPEND_OUT;
                     }
                 }
-                if(!unsupported){
+                if (!pipelineInvalid) {
                     String command;
-                    List<String> argument;
-                    List<String>commandArguments;
-                    List<Parser.CommandInformation>External= new ArrayList<>();
-                    ByteArrayOutputStream memoryBuffer = null;
-                    boolean isThisLastCommand = false;
+                    List<String> arguments;
+                    List<String> commandArguments;
+                    // consecutive external commands waiting to be run as one process pipe
+                    List<Parser.CommandInformation> pendingExternalCommands = new ArrayList<>();
+                    ByteArrayOutputStream builtinOutput = null;
+                    boolean isLastCommand = false;
 
-                    for (int i = 0; i< commandRecord.size();i++) {
-                        commandArguments = commandRecord.get(i).arguments();
-                        command = commandArguments.getFirst();
-                        argument = commandArguments.subList(1, commandArguments.toArray().length);
+                    for (int i = 0; i < pipeline.size(); i++) {
+                        arguments = pipeline.get(i).arguments();
+                        command = arguments.getFirst();
+                        commandArguments = arguments.subList(1, arguments.size());
                         PrintStream originalOut = System.out;
-                        boolean isCommandAfterExternalisBuiltin= false;
-                        if(i==commandRecord.size()-1){
-                            isThisLastCommand = true;
+                        boolean builtinWroteToBuffer = false;
+                        if (i == pipeline.size() - 1) {
+                            isLastCommand = true;
                         }
                         if (BuiltInCommands.isBuiltInCommand(command)) {
-                            if(!External.isEmpty()) {
-                                ExternalCommandRunner.executeCommandPipe(External, memoryBuffer, false,outputFile,appendOutput);
-                                if (memoryBuffer != null) {
-                                    memoryBuffer.reset();
+                            if (!pendingExternalCommands.isEmpty()) {
+                                ExternalCommandRunner.executeCommandPipe(pendingExternalCommands, builtinOutput, false, outputFile, appendOutput);
+                                if (builtinOutput != null) {
+                                    builtinOutput.reset();
                                 }
-                                External.clear();
+                                pendingExternalCommands.clear();
                             }
-                            if(isThisLastCommand){
-                                BuiltInCommands.executeBuiltInCommand(command, argument);
-                            }else {
-                                memoryBuffer = new ByteArrayOutputStream();
-                                PrintStream customStream = new PrintStream(memoryBuffer);
-                                System.setOut(customStream);
-                                BuiltInCommands.executeBuiltInCommand(command, argument);
-                                isCommandAfterExternalisBuiltin = true;
+                            if (isLastCommand) {
+                                if (!outputFile.isBlank()) {
+                                    try {
+                                        System.setOut(createPrintStream(appendOutput, outputFile));
+
+                                    } catch (IOException e) {
+                                        System.setOut(originalOut);
+                                        System.out.println(outputFile + ": no file or directory");
+                                        continue;
+                                    }
+                                } else {
+
+                                    BuiltInCommands.executeBuiltInCommand(command, commandArguments);
+                                }
+                                System.setOut(originalOut);
+                            } else {
+                                builtinOutput = new ByteArrayOutputStream();
+                                PrintStream bufferStream = new PrintStream(builtinOutput);
+                                System.setOut(bufferStream);
+                                BuiltInCommands.executeBuiltInCommand(command, commandArguments);
+                                builtinWroteToBuffer = true;
                                 System.setOut(originalOut);
                             }
                         } else {
-                            External.add(commandRecord.get(i));
+                            pendingExternalCommands.add(pipeline.get(i));
                         }
-                        if(!External.isEmpty() && (isCommandAfterExternalisBuiltin || isThisLastCommand)) {
-                            ExternalCommandRunner.executeCommandPipe(External, memoryBuffer, isThisLastCommand,outputFile,appendOutput);
-                            if (memoryBuffer != null) {
-                                memoryBuffer.reset();
+                        if (!pendingExternalCommands.isEmpty() && (builtinWroteToBuffer || isLastCommand)) {
+                            ExternalCommandRunner.executeCommandPipe(pendingExternalCommands, builtinOutput, isLastCommand, outputFile, appendOutput);
+                            if (builtinOutput != null) {
+                                builtinOutput.reset();
                             }
-                            External.clear();
+                            pendingExternalCommands.clear();
                         }
                     }
                 }
             }
-            isThisFirstTimeParser = true;
+            startingNewCommand = true;
         }
     }
 
@@ -178,4 +193,3 @@ public class CommandShell {
     }
 
 }
-

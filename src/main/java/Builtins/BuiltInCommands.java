@@ -7,7 +7,7 @@ import java.util.*;
 import static Builtins.Pwd.printWorkingDirectory;
 
 public interface BuiltInCommands{
-      String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete","jobs"};
+      String[] BUILT_IN_COMMANDS = {"echo", "exit", "pwd", "type", "cd","complete","jobs","history"};
 
      static String completeBuiltInCommand(String commandPrefix)
     {
@@ -49,6 +49,7 @@ public interface BuiltInCommands{
             case "cd" -> CD.changeDirectory(argumentText);
             case "complete"-> Complete.printCompletion(argumentText);
             case "jobs"->Jobs.printBackgroundInfo();
+            case "history"->History.createHistoryFile();
         }
     }
 }

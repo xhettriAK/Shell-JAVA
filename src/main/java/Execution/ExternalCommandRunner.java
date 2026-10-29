@@ -94,7 +94,7 @@ public class ExternalCommandRunner {
 
     }
 
-    public static boolean isCommandAvailable(String command) {
+    public static boolean isCommandNotAvailable(String command) {
         return PathUtils.findExecutable(command).isEmpty();
     }
     public static Set<String> executeCompletorCommand(StringBuilder input, String path, String argv1, String argv2, String argv3)  {
@@ -132,7 +132,7 @@ public class ExternalCommandRunner {
             commandArgs.append(i).append(" ");
         }
        String s=  commandArgs.toString();
-        if (isCommandAvailable(commandName)) {
+        if (isCommandNotAvailable(commandName)) {
             System.err.println(commandName + ": command not found");
         } else {
             ProcessBuilder processBuilder = new ProcessBuilder(commandArguments).directory(new File(WorkingDirectory.getCurrentDirectory()));
