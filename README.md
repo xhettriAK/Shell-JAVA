@@ -1,8 +1,6 @@
 # Shell-JAVA
 
-A Unix-like shell written from scratch in Java. It started as the CodeCrafters "Build Your Own Shell" challenge and grew into its own project, with a hand-written lexer, a recursive descent parser, raw-mode line editing, tab completion, pipelines, background jobs, and persistent history.
-
-Built by Ayush K C.
+A Unix-like shell written from scratch in Java. It started as the CodeCrafters "Build Your Own Shell" challenge .  I wrote  lexer, a recursive descent parser, raw-mode line editing, tab completion, pipelines, background jobs, and persistent history.
 
 ## Features
 
