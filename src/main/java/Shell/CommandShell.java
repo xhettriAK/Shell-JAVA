@@ -1,14 +1,16 @@
 package Shell;
-
 import Builtins.BuiltInCommands;
 import Builtins.History.History;
 import Builtins.Jobs;
+import Builtins.WorkingDirectory;
 import Execution.ExternalCommandRunner;
 import Execution.PathUtils;
 import Token.*;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,9 @@ public class CommandShell {
     // false while the previous line was incomplete and we are reading its continuation
     private static boolean startingNewCommand = true;
 
+
     public static void run(BufferedReader reader) throws ParserError, IOException {
+
         String userInput = "";
         while (true) {
             if (!Jobs.isJobListEmpty()) {
@@ -31,6 +35,8 @@ public class CommandShell {
                 System.out.print("> ");
             }
             userInput += new LineReader().readUserInput(reader, startingNewCommand);
+            boolean errorReport = false;
+            String cwd = WorkingDirectory.getCurrentDirectory();
 
             Lexer lexer = new Lexer(userInput);
             Parser parser = new Parser(lexer.scanTokens());
@@ -41,20 +47,32 @@ public class CommandShell {
             if ("exit".equals(userInput)) {
                 break;
             }
+            if(!userInput.equals("history")) {
+                History.create(userInput);
+            }
             try {
                 pipeline = parser.parse();
             } catch (ParserError e) {
+                errorReport = true;
                 int length = Math.max(e.getLength(), 1);
                 String errorMarker = " ".repeat(e.getOffset()) + "^".repeat(length);
                 System.err.println("shell: " + e.getMessage());
                 System.err.println(userInput);
                 System.err.println(errorMarker);
+            }finally {
+                if(errorReport){
+                    if(!userInput.equals("history")) {
+                        Instant now = Instant.now();
+                        long millis = now.toEpochMilli();
+                        History.writeHistory(new History.historyEntries(userInput, millis, cwd, new ArrayList<>()));
+                    }
+                }
             }
+
             if (lexer.isInComplete() || parser.isIncomplete()) {
                 startingNewCommand = false;
                 continue;
             }
-            History.create(userInput);
             if (pipeline.size() == 1) {
                 Parser.CommandInformation commandInfo = pipeline.getFirst();
                 List<String> arguments = commandInfo.arguments();
@@ -183,6 +201,14 @@ public class CommandShell {
                     }
                 }
             }
+            if(!errorReport) {
+                if(!userInput.equals("history")) {
+                    Instant now = Instant.now();
+                    long millis = now.toEpochMilli();
+                    List<String> paths = check(pipeline);
+                    History.writeHistory(new History.historyEntries(userInput, millis, cwd, paths));
+                }
+            }
             startingNewCommand = true;
         }
     }
@@ -192,6 +218,20 @@ public class CommandShell {
             return new PrintStream(Files.newOutputStream(PathUtils.resolveFromCurrentDirectory(fileName), CREATE, StandardOpenOption.APPEND));
         }
         return new PrintStream(Files.newOutputStream(PathUtils.resolveFromCurrentDirectory(fileName)));
+    }
+    public static List<String> check(List<Parser.CommandInformation>list){
+            List<String>paths = new ArrayList<>();
+            if(!list.isEmpty()){
+                for (Parser.CommandInformation commandInformation : list) {
+                    List<String> arg = commandInformation.arguments();
+                    for (int j = 1; j < arg.size(); j++) {
+                        if (PathUtils.isThisPath(arg.get(j))) {
+                            paths.add(arg.get(j));
+                        }
+                    }
+                }
+            }
+        return paths;
     }
 
 }

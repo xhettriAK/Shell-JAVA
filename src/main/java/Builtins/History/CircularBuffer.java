@@ -14,6 +14,7 @@ public class CircularBuffer {
             rear=(rear+1)%capacity;
             hist[rear]=value;
             currentSize++;
+
         }
 
     }

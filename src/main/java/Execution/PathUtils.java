@@ -51,7 +51,10 @@ public class PathUtils {
         return matches;
 
     }
-
+    public static boolean isThisPath(String pathName){
+        Path p = Path.of(WorkingDirectory.getCurrentDirectory()).resolve(pathName);
+        return Files.isDirectory(p) || Files.isRegularFile(p);
+    }
     public static Path resolveFromCurrentDirectory(String fileName) {
 
         Path currentDirectory = Path.of(WorkingDirectory.getCurrentDirectory());
