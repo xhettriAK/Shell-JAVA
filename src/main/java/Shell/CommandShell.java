@@ -1,5 +1,6 @@
 package Shell;
 import Builtins.BuiltInCommands;
+import Builtins.History.CircularBuffer;
 import Builtins.History.History;
 import Builtins.Jobs;
 import Builtins.WorkingDirectory;
@@ -9,6 +10,7 @@ import Token.*;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ public class CommandShell {
 
     public static void run(BufferedReader reader) throws ParserError, IOException {
 
+        History.fillTheBuffer();
         String userInput = "";
         while (true) {
             if (!Jobs.isJobListEmpty()) {

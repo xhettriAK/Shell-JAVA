@@ -2,8 +2,11 @@ package Builtins.History;
 
 import Builtins.BuiltInCommands;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class History implements BuiltInCommands {
@@ -105,6 +109,28 @@ public class History implements BuiltInCommands {
         }
 
     }
+    public static void fillTheBuffer()  {
+        File file = new File(historyFile.toUri());
+        if(file.length()!=0){
+            try{
+            YAMLMapper mapper = new YAMLMapper();
+            JsonNode read = mapper.readTree(historyFile.toFile());
+            if (read.isArray()) {
+                for (JsonNode node : read) {
+                    if (node.has("cmd")) {
+                        CircularBuffer.Add(node.get("cmd").asText());
+                    }
+                }
+            }
+
+            } catch (IOException e) {
+
+                System.out.println("Something went wrong");
+            }
+
+        }
+
+    }
 
     public static void run(String command){
         Read();
@@ -139,5 +165,8 @@ public class History implements BuiltInCommands {
 
         }
 
+    }
+    public static Path getPathofFile(){
+        return historyFile;
     }
 }

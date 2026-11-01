@@ -6,17 +6,17 @@ public class CircularBuffer {
     private static int rear = -1;
     private static int currentSize = 0;
     private static String[] hist = new String[capacity];
+    public static void addFromFiles(String value){
+
+    }
     public static void Add(String value) {
         if(currentSize==capacity){
             remove(value);
-
         }else{
             rear=(rear+1)%capacity;
             hist[rear]=value;
             currentSize++;
-
         }
-
     }
     public static void remove(String value) {
         hist[front]=value;
