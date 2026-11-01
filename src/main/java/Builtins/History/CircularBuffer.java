@@ -5,11 +5,9 @@ public class CircularBuffer {
     private static int front = 0;
     private static int rear = -1;
     private static int currentSize = 0;
-    private static String[] hist = new String[capacity];
-    public static void addFromFiles(String value){
+    private static History.historyEntries[] hist = new History.historyEntries[capacity];
 
-    }
-    public static void Add(String value) {
+    public static void Add(History.historyEntries value) {
         if(currentSize==capacity){
             remove(value);
         }else{
@@ -18,7 +16,7 @@ public class CircularBuffer {
             currentSize++;
         }
     }
-    public static void remove(String value) {
+    public static void remove(History.historyEntries value) {
         hist[front]=value;
         rear = front;
         front=(front+1)%capacity;
@@ -27,7 +25,7 @@ public class CircularBuffer {
     public static String getValue(int index) {
         if (index >= 0 && index <= currentSize - 1) {
             index = (front + index) % capacity;
-            return hist[index];
+            return hist[index].cmd();
         }
         return null;
     }

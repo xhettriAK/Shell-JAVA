@@ -50,9 +50,6 @@ public class CommandShell {
             if ("exit".equals(userInput)) {
                 break;
             }
-            if(!userInput.equals("history")) {
-                History.create(userInput);
-            }
             try {
                 pipeline = parser.parse();
             } catch (ParserError e) {

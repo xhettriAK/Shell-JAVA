@@ -1,7 +1,9 @@
 package Builtins.History;
 
 import Builtins.BuiltInCommands;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -26,6 +28,7 @@ public class History implements BuiltInCommands {
 
 
     public static void writeHistory(historyEntries historyList) throws IOException {
+        CircularBuffer.Add(historyList);
         try{
             if(!Files.isDirectory( historyDir)){
                 Files.createDirectories(historyDir);
@@ -112,31 +115,23 @@ public class History implements BuiltInCommands {
     public static void fillTheBuffer()  {
         File file = new File(historyFile.toUri());
         if(file.length()!=0){
-            try{
-            YAMLMapper mapper = new YAMLMapper();
-            JsonNode read = mapper.readTree(historyFile.toFile());
-            if (read.isArray()) {
-                for (JsonNode node : read) {
-                    if (node.has("cmd")) {
-                        CircularBuffer.Add(node.get("cmd").asText());
-                    }
+            try {
+                ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                List<historyEntries> historyList = mapper.readValue(new File(historyFile.toUri()), new TypeReference<>() {
+                });
+                for (var readCurrentHistoryLine : historyList) {
+                    CircularBuffer.Add(readCurrentHistoryLine);
                 }
+
+            }catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
-            } catch (IOException e) {
-
-                System.out.println("Something went wrong");
             }
-
-        }
 
     }
 
     public static void run(String command){
         Read();
-    }
-    public static void create(String Value) {
-        CircularBuffer.Add(Value);
     }
     public static void print() {
         int size = CircularBuffer.getCurrentSize();
