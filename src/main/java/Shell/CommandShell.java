@@ -23,6 +23,7 @@ public class CommandShell {
     private static boolean startingNewCommand = true;
 
 
+
     public static void run(BufferedReader reader) throws ParserError, IOException {
 
         History.fillTheBuffer();
@@ -37,7 +38,7 @@ public class CommandShell {
             } else {
                 System.out.print("> ");
             }
-            userInput += new LineReader().readUserInput(reader, startingNewCommand);
+            userInput+= new LineReader().readUserInput(reader,startingNewCommand);
             boolean errorReport = false;
             String cwd = WorkingDirectory.getCurrentDirectory();
 

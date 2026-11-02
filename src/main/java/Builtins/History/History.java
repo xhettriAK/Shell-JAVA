@@ -1,13 +1,9 @@
 package Builtins.History;
 
 import Builtins.BuiltInCommands;
-import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -15,10 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 public class History implements BuiltInCommands {
@@ -160,8 +154,5 @@ public class History implements BuiltInCommands {
 
         }
 
-    }
-    public static Path getPathofFile(){
-        return historyFile;
     }
 }

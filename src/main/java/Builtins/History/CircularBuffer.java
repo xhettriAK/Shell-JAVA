@@ -29,6 +29,13 @@ public class CircularBuffer {
         }
         return null;
     }
+    public static void print(int index){
+
+        for(var Entries : hist){
+
+            System.out.print(Entries.cmd());
+        }
+    }
     public static int getFront() {
         return front;
     }

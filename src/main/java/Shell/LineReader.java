@@ -2,8 +2,10 @@ package Shell;
 
 import Builtins.BuiltInCommands;
 import Builtins.Complete;
+import Builtins.History.CircularBuffer;
 import Execution.ExternalCommandRunner;
 import Execution.PathUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +20,7 @@ public class LineReader {
     private  StringBuilder inputBuilder = new StringBuilder();
     private boolean isDirectory = false;
     private boolean fileOrDirectory = false;
+    private int  currentIndex = 0;
 
     private  void  handleBackSpace()
     {
@@ -26,6 +29,9 @@ public class LineReader {
             System.out.print("\b \b");
         }
         previousKeyWasTab = false;
+    }
+    private void clearScreen(){
+
     }
     private void handleEnter(){
         previousKeyWasTab = false;
@@ -39,7 +45,14 @@ public class LineReader {
         inputBuilder.append(inputCharacter);
 
     }
+    private   void handleArrowUP(){
+        currentIndex++;
+        inputBuilder.append(CircularBuffer.print(currentIndex));
 
+    }
+    private   void  handleArrowDown(){
+
+    }
 
     private void handleTab(char inputCharacter) {
 
@@ -120,6 +133,24 @@ public class LineReader {
         while (((inputCode = reader.read()) != -1)) {
 
             inputCharacter = (char) inputCode;
+            if(inputCharacter=='\033'){
+
+                int secondChar = reader.read(); // Should be 91 ('[')
+                int thirdChar = reader.read();  // Should be 'A', 'B', 'C', or 'D'
+
+                if (secondChar == 91) {
+                    switch (thirdChar) {
+                        case 'A':
+                            handleArrowUP();
+                            break;
+                        case 'B':
+                          handleArrowDown();
+                            break;
+                        default:
+                    }
+                    break;
+                }
+            }
 
             if (printableCharacters.isValidValue(inputCode)) {
                 handlePrintableCharacter(inputCharacter);
@@ -137,6 +168,7 @@ public class LineReader {
                         handleTab(inputCharacter);
                     }
                 }
+
             }
         }
         return inputBuilder.toString();
